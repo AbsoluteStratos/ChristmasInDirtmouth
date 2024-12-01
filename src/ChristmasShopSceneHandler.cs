@@ -14,6 +14,9 @@ using static Mono.Security.X509.X520;
 using InControl;
 using static CinematicSkipPopup;
 using HutongGames.PlayMaker.Actions;
+using System.Security.AccessControl;
+using System.ComponentModel;
+using System.Collections;
 
 namespace ChristmasInDirtmouth
 {
@@ -27,12 +30,15 @@ namespace ChristmasInDirtmouth
         private AssetBundle bundle;
         private const string RESOURCE_PATH = "ChristmasInDirtmouth.Resources.christmasshopscene";
         private static Satchel.Core satchelCore = new Satchel.Core();
-        private static GameObject ShopPrefab;
+        private static GameObject ShopPrefab, ShopMenu, SpritePrefab;
         private static bool SceneActive = false;
 
-        public ChristmasShopSceneHandler(GameObject refTileMap, GameObject refSceneManager, GameObject shopRegion)
+        public ChristmasShopSceneHandler(GameObject refTileMap, GameObject refSceneManager, GameObject shopRegion, GameObject shopMenu)
         {
             ModHooks.LanguageGetHook += OnLanguageGet;
+            //On.ShopMenuStock.BuildItemList += BuildItemList;
+            On.ShopMenuStock.SpawnStock += SpawnStock;
+
             // Load scene bundle
             Assembly asm = Assembly.GetExecutingAssembly();
             using (Stream s = asm.GetManifestResourceStream(RESOURCE_PATH))
@@ -44,6 +50,7 @@ namespace ChristmasInDirtmouth
                 bundle = AssetBundle.LoadFromMemory(buffer);
             }
             Path = bundle.GetAllScenePaths()[0];
+            
 
             // Use Satchel to create a custome scene
             // https://github.com/PrashantMohta/Satchel/blob/master/Core.cs#L177
@@ -64,6 +71,7 @@ namespace ChristmasInDirtmouth
             // Store preloaded fabs
             Logger.Info(shopRegion.ToString());
             ShopPrefab = shopRegion;
+            ShopMenu = shopMenu;
         }
 
         private void OnSceneChange(Scene from, Scene to)
@@ -72,7 +80,7 @@ namespace ChristmasInDirtmouth
             SceneActive = (to.name == ChristmasShopSceneHandler.Name);
             if (SceneActive)
             {
-                
+
                 //ChristmasInDirtmouth.ResetPrefabMaterials(GameObject.Find("root"));
                 Logger.Info("Casino interior scene change");
                 // Manually replicating because I already have game objects in the scene
@@ -96,36 +104,75 @@ namespace ChristmasInDirtmouth
                 go.transform.position = GameObject.Find("root/shop").gameObject.transform.position;
                 go.SetActive(true);
 
+                SpritePrefab = GameObject.Find("root/sprites");
+                ChristmasInDirtmouth.ResetPrefabMaterials(SpritePrefab);
+
+                // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/master/ItemChanger/Locations/CustomShopLocation.cs#L96
+                var menu = GameObject.Instantiate(ShopMenu);
+                menu.SetActive(true);
+
+                var itemList = menu.Find("Item List").gameObject;
+                // Need to trigger initialization to inverstigate item list
+                itemList.SetActive(true);
+
+
+                // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/master/ItemChanger/Locations/CustomShopLocation.cs#L117
+                var stock = itemList.GetComponent<ShopMenuStock>();
+
+                stock.enabled = true; ;
+                //stock.UpdateStock();
+
+                UnityEngine.Component[] components = stock.GetComponents(typeof(UnityEngine.Component));
+                foreach (UnityEngine.Component component in components)
+                {
+                    Logger.Info(component.ToString());
+                }
+
+                //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stock))
+                //{
+                //    string name = descriptor.Name;
+                //    object value = descriptor.GetValue(stock);
+                //    Logger.Info("~ "+ name +  " - " + value.ToString());
+                //}
+
+                GameObject[] stockInv = stock.stock;
+
+                Logger.Info(stock.GetItemCount().ToString());
+
+                for (int i = 0; i < stockInv.Length; i++)
+                {
+                    Logger.Info("---- " + stockInv.ToString());
+                }
+
+
                 // Interesting FSM editting reference
                 // https://github.com/SFGrenade/TestOfTeamwork/blob/f2fb8212fa4cc2a725c29e57ca5e2675383adc82/src/MonoBehaviours/WeaverPrincessBossIntro.cs#L45
                 PlayMakerFSM fsm = go.LocateMyFSM("Shop Region");
 
-                fsm.FsmVariables.GetFsmBool("Intro Msg").Value = true;
-                fsm.FsmVariables.GetFsmBool("Relic Dealer").Value = false;
+                Logger.Info("======= HERE ====== " + fsm.FsmVariables.GetFsmBool("Intro Msg").Value.ToString());
 
-                //Satchel.Futils.FsmVariables.SetVariables(fsm, "NPC Title", "Test");
-                //fsm.FsmVariables.GetFsmString("NPC Title").Value = "Test";
-                //fsm.FsmVariables.Get
-                //var call_state = fsm.GetValidState("Title Up");
-                //call_state
+                //fsm.FsmVariables.GetFsmBool("Relic Dealer").Value = false;
 
+                fsm.FsmVariables.GetFsmBool("Intro Msg").Value = true; // Edit here based on mod settings
 
+                // Skip and remove the edits to the player data variable "metSlyShop"
+                Satchel.FsmUtil.ChangeTransition(fsm, "Intro Convo?", "YES", "Title Up");
+                Satchel.FsmUtil.RemoveAction(fsm.GetValidState("Box Up"), 0);
 
+                // Skip any voice lines
                 Satchel.FsmUtil.ChangeTransition(fsm, "Box Up", "FINISHED", "Convo");
 
+                // Modify the main shop state "Shop Up"
+                var shopUp = fsm.GetValidState("Shop Up");
+                if (shopUp != null)
+                {
+                    return; // already edited
+                }
                 Satchel.FsmUtil.ChangeTransition(fsm, "Relic Dealer?", "NO", "Regain Control");
 
-                //GameObject cm = GameObject.Find("CameraLockArea").gameObject;
-                //var cl = cm.AddComponent<CameraLockArea>();
-                //cl.cameraXMin = 15;
-                //cl.cameraXMax = 17;
-                //cl.cameraYMin = 10;
-                //cl.cameraYMax = 22;
-                //cl.preventLookDown = true;
-                //cl.preventLookUp = true;
 
                 // Adding shop behavior
-                GameObject root = GameObject.Find("root/shop").gameObject;
+                //GameObject root = GameObject.Find("root/shop").gameObject;
                 //root.AddComponent<ChristmasShopHandler>();
 
                 Logger.Warning("Gate Set up");
@@ -143,10 +190,9 @@ namespace ChristmasInDirtmouth
         // https://github.com/ToboterXP/HollowKnight.TheGlimmeringRealm/blob/5183853ec31ece532549a6cf88d0b303a8d0fd7e/TextChanger.cs
         public string OnLanguageGet(string key, string sheetTitle, string orig)
         {
-            Logger.Info("Hit");
             if (!SceneActive) { return orig; }
 
-            Logger.Info("==== " + key + "  " + sheetTitle + ": ");
+             Logger.Info("==== " + key + "  " + sheetTitle + ": ");
             // Replacing NPC title (pulled from the FSM of the sly shop)
             if (key == "SLY_SHOP_INTRO" && sheetTitle == "Sly")
             {
@@ -164,11 +210,209 @@ namespace ChristmasInDirtmouth
             {
                 return "Festive Knight";
             }
+
+            else if (key == "CHRISTMAS_ITEM_1" && sheetTitle == "Prices")
+            {
+                return "5";
+            }
             return orig;
         }
 
+        private void SpawnStock(On.ShopMenuStock.orig_SpawnStock orig, ShopMenuStock self)
+        {
+            self.itemCount = -1;
+            float num = 0f;
+            self.stockInv = new GameObject[self.stock.Length];
+ 
+
+            self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+            var stats = self.stock[0].GetComponent<ShopItemStats>();
+            Logger.Warning("=====" + stats.nameConvo);
+            Logger.Warning("=====" + stats.descConvo);
+            Logger.Warning("=====" + stats.cost);
+            Logger.Warning("=====" + stats.priceConvo);
+            Logger.Warning("=====" + stats.itemNumber);
+
+            stats.priceConvo = "CHRISTMAS_ITEM_1";
+
+            //spawnedStock[self.stock[0]].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+
+            self.stock = new GameObject[] { self.stock[0] };
+            //stats.nameConvo = "Test Boyss";
+            //stats.descConvo = "Test desc";
+
+            //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stats))
+            //{
+            //    string name = descriptor.Name;
+            //    object value = descriptor.GetValue(stats);
+            //    Logger.Info("~ " + name + " - " + value.ToString());
+            //}
+            GameObject oldsprite = self.stock[0].Find("Item Sprite").gameObject;
+            
+
+            GameObject sprite = GameObject.Instantiate(SpritePrefab.Find("test"));
+            //sprite.SetActive(true);
+            //sprite.name = "Item Sprite";
+            //sprite.transform.parent = self.stock[0].gameObject.transform;
+            //sprite.transform.position = oldsprite.transform.position;
+            //sprite.transform.localScale = oldsprite.transform.localScale;
+            oldsprite.GetComponent<SpriteRenderer>().sprite = sprite.GetComponent<SpriteRenderer>().sprite;
+
+            Logger.Warning("Hi:" + self.stock[0].Find("Item Sprite").GetComponent<SpriteRenderer>().sprite.name);
+
+            UnityEngine.Component[] components = sprite.GetComponents(typeof(UnityEngine.Component));
+
+            foreach (UnityEngine.Component component in components)
+            {
+                Logger.Info("===" + component.GetType().ToString());
+            }
+
+            for (int i = 0; i < self.stock.Length; i++)
+            {
+                Logger.Warning("+++" + self.stock[i]);
+
+            }
+
+            orig(self);
+        }
+
+        //private void BuildItemList(On.ShopMenuStock.orig_BuildItemList orig, ShopMenuStock self)
+        //{
+        //    Dictionary<GameObject, GameObject> spawnedStock = self.GetSpawnedStock();
+
+        //    self.itemCount = -1;
+        //    float num = 0f;
+        //    self.stockInv = new GameObject[self.stock.Length];
+        //    UnityEngine.Component[] components = self.stock[0].GetComponents(typeof(UnityEngine.Component));
+            
+        //    foreach (UnityEngine.Component component in components)
+        //    {
+        //        Logger.Info("===" + component.GetType().ToString());
+        //    }
+
+        //    self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+        //    var stats = self.stock[0].GetComponent<ShopItemStats>();
+        //    Logger.Warning("=====" + stats.nameConvo);
+        //    Logger.Warning("=====" + stats.descConvo);
+        //    Logger.Warning("=====" + stats.cost);
+        //    Logger.Warning("=====" + stats.priceConvo);
+        //    Logger.Warning("=====" + stats.itemNumber);
+
+        //    stats.cost = 5;
+        //    stats.canBuy = true;
+
+        //    stats.priceConvo = "CHRISTMAS_ITEM_1";
+
+        //    spawnedStock[self.stock[0]].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+
+        //    self.stock = new GameObject[] { self.stock[0] };
+        //    //stats.nameConvo = "Test Boyss";
+        //    //stats.descConvo = "Test desc";
+
+        //    //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stats))
+        //    //{
+        //    //    string name = descriptor.Name;
+        //    //    object value = descriptor.GetValue(stats);
+        //    //    Logger.Info("~ " + name + " - " + value.ToString());
+        //    //}
+
+
+        //    for (int i = 0; i < self.stock.Length; i++)
+        //    {
+        //        Logger.Warning("+++" + self.stock[i]);
+
+        //    }
+
+        //    orig(self);
+        //}
     }
 
+    // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/a2bcdd59284ed6aa4e82ca308b4dc23105ccc72c/ItemChanger/Util/ShopUtil.cs#L98
+    public static class ShopUtil
+    {
+        private static readonly FieldInfo spawnedStockField = typeof(ShopMenuStock).GetField("spawnedStock", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly MethodInfo spawnStockMethod = typeof(ShopMenuStock).GetMethod("SpawnStock", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo itemCostField = typeof(ShopItemStats).GetField("itemCost", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        public static void HookShops()
+        {
+            //On.ShopMenuStock.BuildItemList += BuildItemList;
+            //On.ShopMenuStock.StockLeft += StockLeft;
+            //On.ShopItemStats.OnEnable += OnEnable;
+        }
+
+        //private static void OnEnable(On.ShopItemStats.orig_OnEnable orig, ShopItemStats self)
+        //{
+        //    orig(self);
+        //    var mod = self.gameObject.GetComponent<ModShopItemStats>();
+        //    if (mod)
+        //    {
+        //        Cost? cost = mod.cost;
+        //        CostDisplayer? displayer = mod.costDisplayer;
+        //        if (cost != null)
+        //        {
+        //            if (self.dungDiscount && PlayerData.instance.GetBool(nameof(PlayerData.equippedCharm_10)))
+        //            {
+        //                cost.DiscountRate = 0.8f;
+        //            }
+        //            else
+        //            {
+        //                cost.DiscountRate = 1.0f;
+        //            }
+        //        }
+
+        //        if (cost == null || cost.Paid || cost.CanPay())
+        //        {
+        //            self.transform.Find("Geo Sprite").gameObject.GetComponent<SpriteRenderer>().color = self.activeColour;
+        //            self.transform.Find("Item Sprite").gameObject.GetComponent<SpriteRenderer>().color = self.activeColour;
+        //            self.transform.Find("Item cost").gameObject.GetComponent<TextMeshPro>().color = self.activeColour;
+        //        }
+        //        else
+        //        {
+        //            self.transform.Find("Geo Sprite").gameObject.GetComponent<SpriteRenderer>().color = self.inactiveColour;
+        //            self.transform.Find("Item Sprite").gameObject.GetComponent<SpriteRenderer>().color = self.inactiveColour;
+        //            self.transform.Find("Item cost").gameObject.GetComponent<TextMeshPro>().color = self.inactiveColour;
+        //        }
+
+        //        int geo;
+        //        if (mod.placement is AbstractPlacement p && !p.HasTag<Tags.DisableCostPreviewTag>() && !mod.item.HasTag<Tags.DisableCostPreviewTag>()
+        //            && cost is not null && !cost.Paid && displayer != null)
+        //        {
+        //            geo = displayer.GetDisplayAmount(cost);
+        //        }
+        //        else
+        //        {
+        //            geo = 0;
+        //        }
+        //        self.SetCost(geo);
+        //        ((GameObject)itemCostField.GetValue(self)).GetComponent<TextMeshPro>().text = geo.ToString();
+        //    }
+        //}
+
+        //private static bool StockLeft(On.ShopMenuStock.orig_StockLeft orig, ShopMenuStock self)
+        //{
+        //    return self.stock.Any(g => ShopMenuItemAppears(g));
+        //}
+
+        public static void UnhookShops()
+        {
+            //On.ShopMenuStock.BuildItemList -= BuildItemList;
+            //On.ShopMenuStock.StockLeft -= StockLeft;
+            //On.ShopItemStats.OnEnable -= OnEnable;
+        }
+
+        public static Dictionary<GameObject, GameObject> GetSpawnedStock(this ShopMenuStock stock)
+        {
+            var dict = spawnedStockField.GetValue(stock);
+            if (dict == null)
+            {
+                spawnStockMethod.Invoke(stock, new object[0]);
+                spawnedStockField.GetValue(stock);
+            }
+
+            return (Dictionary<GameObject, GameObject>)spawnedStockField.GetValue(stock);
+        }
+    }
 
     public class ChristmasShopHandler : MonoBehaviour
     {
