@@ -17,6 +17,8 @@ using HutongGames.PlayMaker.Actions;
 using System.Security.AccessControl;
 using System.ComponentModel;
 using System.Collections;
+using FrogCore;
+
 
 namespace ChristmasInDirtmouth
 {
@@ -118,6 +120,8 @@ namespace ChristmasInDirtmouth
 
                 // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/master/ItemChanger/Locations/CustomShopLocation.cs#L117
                 var stock = itemList.GetComponent<ShopMenuStock>();
+                Logger.Info("Hereeee");
+                //Logger.Info(stock.masterList.ToString());
 
                 //stock.enabled = true; ;
                 ////stock.UpdateStock();
@@ -192,7 +196,8 @@ namespace ChristmasInDirtmouth
         {
             if (!SceneActive) { return orig; }
 
-             Logger.Info("==== " + key + "  " + sheetTitle + ": ");
+             //Logger.Info("==== " + key + "  " + sheetTitle + ": ");
+            Debug.Log("==== " + key + "  " + sheetTitle + ": ");
             // Replacing NPC title (pulled from the FSM of the sly shop)
             if (key == "SLY_SHOP_INTRO" && sheetTitle == "Sly")
             {
@@ -215,29 +220,103 @@ namespace ChristmasInDirtmouth
             {
                 return "5";
             }
+            else if (key == "CHRISTMAS_ITEM_2" && sheetTitle == "Prices")
+            {
+                return "10";
+            }
+            else if (key == "CHRISTMAS_ITEM_3" && sheetTitle == "Prices")
+            {
+                return "5";
+            }
             return orig;
         }
 
         private void SpawnStock(On.ShopMenuStock.orig_SpawnStock orig, ShopMenuStock self)
         {
+            if (self.stock.Length == 0) { orig(self); return; }
+            if (!SceneActive) { orig(self); return; }
+
             self.itemCount = -1;
             float num = 0f;
             self.stockInv = new GameObject[self.stock.Length];
- 
 
+
+
+            //self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+            //var stats = self.stock[0].GetComponent<ShopItemStats>();
+            //Logger.Warning("=====" + stats.nameConvo);
+            //Logger.Warning("=====" + stats.descConvo);
+            //Logger.Warning("=====" + stats.cost);
+            //Logger.Warning("=====" + stats.priceConvo);
+            //Logger.Warning("=====" + stats.itemNumber);
+
+            Logger.Error("rebuilding shop");
+
+            Sprite itemSprite = SpritePrefab.Find("test").GetComponent<SpriteRenderer>().sprite;
+            CustomItemStats item1 = CustomItemStats.CreateNormalItem(itemSprite, "", "INV_NAME_HEARTPIECE_1", "SHOP_DESC_HEARTPIECE_1", 20);
+            CustomItemStats item2 = CustomItemStats.CreateNormalItem(itemSprite, "", "INV_NAME_HEARTPIECE_1", "SHOP_DESC_HEARTPIECE_1", 20);
+            CustomItemStats item3 = CustomItemStats.CreateNormalItem(itemSprite, "", "INV_NAME_HEARTPIECE_1", "SHOP_DESC_HEARTPIECE_1", 20);
+            CustomItemStats[] items = { item1, item2, item3 };
+
+            //stats.priceConvo = "CHRISTMAS_ITEM_1";
+
+            GameObject prefab = self.stock[0];
+            self.stock = new GameObject[2];
+
+            self.stock[0] = GameObject.Instantiate(prefab, prefab.transform.parent);
+            self.stock[0].GetComponent<ShopItemStats>().charmsRequired = 0;
+            self.stock[0].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_HEARTPIECE_1";
+            self.stock[0].GetComponent<ShopItemStats>().descConvo = "INV_NAME_HEARTPIECE_1";
             self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
-            var stats = self.stock[0].GetComponent<ShopItemStats>();
-            Logger.Warning("=====" + stats.nameConvo);
-            Logger.Warning("=====" + stats.descConvo);
-            Logger.Warning("=====" + stats.cost);
-            Logger.Warning("=====" + stats.priceConvo);
-            Logger.Warning("=====" + stats.itemNumber);
+            self.stock[0].GetComponent<ShopItemStats>().specialType = 0;
+            self.stock[0].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
+            self.stock[0].GetComponent<ShopItemStats>().playerDataBoolName = "";
+            self.stock[0].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
+            self.stock[0].SetActive(false);
+            self.stock[0].name = "Test_obj";
 
-            stats.priceConvo = "CHRISTMAS_ITEM_1";
+            self.stock[1] = GameObject.Instantiate(prefab, prefab.transform.parent);
+            self.stock[1].GetComponent<ShopItemStats>().charmsRequired = 0;
+            self.stock[1].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_HEARTPIECE_1";
+            self.stock[1].GetComponent<ShopItemStats>().descConvo = "INV_NAME_HEARTPIECE_1";
+            self.stock[1].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_2";
+            self.stock[1].GetComponent<ShopItemStats>().specialType = 0;
+            self.stock[1].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
+            self.stock[1].GetComponent<ShopItemStats>().playerDataBoolName = "";
+            self.stock[1].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
+            self.stock[1].SetActive(false);
+            self.stock[1].name = "Test_obj_2";
 
-            //spawnedStock[self.stock[0]].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+            //self.stock[0] = prefab;
+            //self.stock[1] = prefab;
 
-            self.stock = new GameObject[] { self.stock[0] };
+            var spawnedStock = new Dictionary<GameObject, GameObject>(self.stock.Length);
+            GameObject[] array = self.stock;
+            foreach (GameObject gameObject in array)
+            {
+                Logger.Error("Setting go");
+                GameObject gameObject2 = GameObject.Instantiate(gameObject);
+                gameObject2.SetActive(value: false);
+                spawnedStock.Add(gameObject, gameObject2);
+            }
+
+            //var prop = self.GetType().GetField("spawnedStock", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            //prop.SetValue(self, spawnedStock);
+
+            // Edit the master component
+            var masterStock = self.masterList.GetComponent<ShopMenuStock>();
+            masterStock.stock = self.stock;
+            //var prop = masterStock.GetType().GetField("spawnedStock", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            //prop.SetValue(masterStock, spawnedStock);
+
+
+
+            Logger.Info(spawnedStock[self.stock[0]].name);
+            //Logger.Info("here");
+            //Logger.Info(self.StockLeft().ToString());
+
+
+            //self.stock = new GameObject[] { self.stock[0] };
             //stats.nameConvo = "Test Boyss";
             //stats.descConvo = "Test desc";
 
@@ -247,84 +326,92 @@ namespace ChristmasInDirtmouth
             //    object value = descriptor.GetValue(stats);
             //    Logger.Info("~ " + name + " - " + value.ToString());
             //}
-            GameObject oldsprite = self.stock[0].Find("Item Sprite").gameObject;
-            
+            //GameObject oldsprite = self.stock[0].Find("Item Sprite").gameObject;
 
-            GameObject sprite = GameObject.Instantiate(SpritePrefab.Find("test"));
+
+            //GameObject[] array = stock;
+            //foreach (GameObject gameObject in array)
+            //{
+            //    GameObject gameObject2 = Object.Instantiate(gameObject);
+            //    gameObject2.SetActive(value: false);
+            //    spawnedStock.Add(gameObject, gameObject2);
+            //}
+
+            //GameObject sprite = GameObject.Instantiate(SpritePrefab.Find("test"));
             //sprite.SetActive(true);
             //sprite.name = "Item Sprite";
             //sprite.transform.parent = self.stock[0].gameObject.transform;
             //sprite.transform.position = oldsprite.transform.position;
             //sprite.transform.localScale = oldsprite.transform.localScale;
-            oldsprite.GetComponent<SpriteRenderer>().sprite = sprite.GetComponent<SpriteRenderer>().sprite;
+            //oldsprite.GetComponent<SpriteRenderer>().sprite = sprite.GetComponent<SpriteRenderer>().sprite;
 
-            Logger.Warning("Hi:" + self.stock[0].Find("Item Sprite").GetComponent<SpriteRenderer>().sprite.name);
+            //Logger.Warning("Hi:" + self.stock[0].Find("Item Sprite").GetComponent<SpriteRenderer>().sprite.name);
 
-            UnityEngine.Component[] components = sprite.GetComponents(typeof(UnityEngine.Component));
+            //UnityEngine.Component[] components = sprite.GetComponents(typeof(UnityEngine.Component));
 
-            foreach (UnityEngine.Component component in components)
-            {
-                Logger.Info("===" + component.GetType().ToString());
-            }
+            //foreach (UnityEngine.Component component in components)
+            //{
+            //    Logger.Info("===" + component.GetType().ToString());
+            //}
 
-            for (int i = 0; i < self.stock.Length; i++)
-            {
-                Logger.Warning("+++" + self.stock[i]);
+            //for (int i = 0; i < self.stock.Length; i++)
+            //{
+            //    Logger.Warning("+++" + self.stock[i]);
 
-            }
+            //}
 
             orig(self);
         }
 
-        //private void BuildItemList(On.ShopMenuStock.orig_BuildItemList orig, ShopMenuStock self)
-        //{
-        //    Dictionary<GameObject, GameObject> spawnedStock = self.GetSpawnedStock();
+        private void BuildItemList(On.ShopMenuStock.orig_BuildItemList orig, ShopMenuStock self)
+        {
+            //    Dictionary<GameObject, GameObject> spawnedStock = self.GetSpawnedStock();
 
-        //    self.itemCount = -1;
-        //    float num = 0f;
-        //    self.stockInv = new GameObject[self.stock.Length];
-        //    UnityEngine.Component[] components = self.stock[0].GetComponents(typeof(UnityEngine.Component));
-            
-        //    foreach (UnityEngine.Component component in components)
-        //    {
-        //        Logger.Info("===" + component.GetType().ToString());
-        //    }
+            //    self.itemCount = -1;
+            //    float num = 0f;
+            //    self.stockInv = new GameObject[self.stock.Length];
+            //    UnityEngine.Component[] components = self.stock[0].GetComponents(typeof(UnityEngine.Component));
 
-        //    self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
-        //    var stats = self.stock[0].GetComponent<ShopItemStats>();
-        //    Logger.Warning("=====" + stats.nameConvo);
-        //    Logger.Warning("=====" + stats.descConvo);
-        //    Logger.Warning("=====" + stats.cost);
-        //    Logger.Warning("=====" + stats.priceConvo);
-        //    Logger.Warning("=====" + stats.itemNumber);
+            //    foreach (UnityEngine.Component component in components)
+            //    {
+            //        Logger.Info("===" + component.GetType().ToString());
+            //    }
 
-        //    stats.cost = 5;
-        //    stats.canBuy = true;
+            //    self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+            //    var stats = self.stock[0].GetComponent<ShopItemStats>();
+            //    Logger.Warning("=====" + stats.nameConvo);
+            //    Logger.Warning("=====" + stats.descConvo);
+            //    Logger.Warning("=====" + stats.cost);
+            //    Logger.Warning("=====" + stats.priceConvo);
+            //    Logger.Warning("=====" + stats.itemNumber);
 
-        //    stats.priceConvo = "CHRISTMAS_ITEM_1";
+            //    stats.cost = 5;
+            //    stats.canBuy = true;
 
-        //    spawnedStock[self.stock[0]].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
+            //    stats.priceConvo = "CHRISTMAS_ITEM_1";
 
-        //    self.stock = new GameObject[] { self.stock[0] };
-        //    //stats.nameConvo = "Test Boyss";
-        //    //stats.descConvo = "Test desc";
+            //    spawnedStock[self.stock[0]].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
 
-        //    //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stats))
-        //    //{
-        //    //    string name = descriptor.Name;
-        //    //    object value = descriptor.GetValue(stats);
-        //    //    Logger.Info("~ " + name + " - " + value.ToString());
-        //    //}
+            //    self.stock = new GameObject[] { self.stock[0] };
+            //    //stats.nameConvo = "Test Boyss";
+            //    //stats.descConvo = "Test desc";
+
+            //    //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stats))
+            //    //{
+            //    //    string name = descriptor.Name;
+            //    //    object value = descriptor.GetValue(stats);
+            //    //    Logger.Info("~ " + name + " - " + value.ToString());
+            //    //}
 
 
-        //    for (int i = 0; i < self.stock.Length; i++)
-        //    {
-        //        Logger.Warning("+++" + self.stock[i]);
+            //    for (int i = 0; i < self.stock.Length; i++)
+            //    {
+            //        Logger.Warning("+++" + self.stock[i]);
 
-        //    }
+            //    }
 
-        //    orig(self);
-        //}
+            //    orig(self);
+        }
     }
 
     // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/a2bcdd59284ed6aa4e82ca308b4dc23105ccc72c/ItemChanger/Util/ShopUtil.cs#L98

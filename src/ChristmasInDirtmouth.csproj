@@ -325,6 +325,9 @@
     <Reference Include="Satchel">
       <HintPath>$(HollowKnightRefs)/Mods/Satchel/Satchel.dll</HintPath>
     </Reference>
+	<Reference Include="FrogCore">
+		<HintPath>$(HollowKnightRefs)/Mods/FrogCore/FrogCore.dll</HintPath>
+	</Reference>
   </ItemGroup>
   <ItemGroup>
       <EmbeddedResource Include="Resources\*" />
