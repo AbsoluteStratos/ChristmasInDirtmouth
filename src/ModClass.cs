@@ -27,7 +27,6 @@ namespace ChristmasInDirtmouth
             Instance = this;
 
             ModHooks.HeroUpdateHook += OnHeroUpdate;
-            ShopUtil.HookShops();
 
             // Prepare classes from preloaded objects
             // https://github.com/PrashantMohta/Smolknight/blob/6a6253ca3ea6549cc17bff47c33ade2ac28054e7/Smolknight.cs#L134
