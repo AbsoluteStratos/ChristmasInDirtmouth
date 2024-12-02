@@ -113,20 +113,20 @@ namespace ChristmasInDirtmouth
 
                 var itemList = menu.Find("Item List").gameObject;
                 // Need to trigger initialization to inverstigate item list
-                itemList.SetActive(true);
+                //itemList.SetActive(true);
 
 
                 // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/master/ItemChanger/Locations/CustomShopLocation.cs#L117
                 var stock = itemList.GetComponent<ShopMenuStock>();
 
-                stock.enabled = true; ;
-                //stock.UpdateStock();
+                //stock.enabled = true; ;
+                ////stock.UpdateStock();
 
-                UnityEngine.Component[] components = stock.GetComponents(typeof(UnityEngine.Component));
-                foreach (UnityEngine.Component component in components)
-                {
-                    Logger.Info(component.ToString());
-                }
+                //UnityEngine.Component[] components = stock.GetComponents(typeof(UnityEngine.Component));
+                //foreach (UnityEngine.Component component in components)
+                //{
+                //    Logger.Info(component.ToString());
+                // }
 
                 //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stock))
                 //{
@@ -135,14 +135,14 @@ namespace ChristmasInDirtmouth
                 //    Logger.Info("~ "+ name +  " - " + value.ToString());
                 //}
 
-                GameObject[] stockInv = stock.stock;
+                //GameObject[] stockInv = stock.stock;
 
-                Logger.Info(stock.GetItemCount().ToString());
+                //Logger.Info(stock.GetItemCount().ToString());
 
-                for (int i = 0; i < stockInv.Length; i++)
-                {
-                    Logger.Info("---- " + stockInv.ToString());
-                }
+                //for (int i = 0; i < stockInv.Length; i++)
+                //{
+                //    Logger.Info("---- " + stockInv.ToString());
+                //}
 
 
                 // Interesting FSM editting reference
