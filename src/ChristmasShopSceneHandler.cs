@@ -18,6 +18,7 @@ using System.Security.AccessControl;
 using System.ComponentModel;
 using System.Collections;
 using FrogCore;
+using HutongGames.PlayMaker;
 
 
 namespace ChristmasInDirtmouth
@@ -90,7 +91,7 @@ namespace ChristmasInDirtmouth
                 GameObject gate = GameObject.Find(ChristmasShopSceneHandler.Gate).gameObject;
                 var tp = gate.AddComponent<TransitionPoint>();
 
-                // See Casino Exterior for linked Gate
+                // Set up gate back to town
                 tp.isADoor = false;
                 tp.SetTargetScene("Town");
                 tp.entryPoint = "door_christmas_shop";
@@ -102,70 +103,60 @@ namespace ChristmasInDirtmouth
                 tp.respawnMarker.respawnFacingRight = true;
                 tp.sceneLoadVisualization = GameManager.SceneLoadVisualizations.Default;
 
-                var go = GameObject.Instantiate(ShopPrefab);
-                go.transform.position = GameObject.Find("root/shop").gameObject.transform.position;
-                go.SetActive(true);
+                
 
                 SpritePrefab = GameObject.Find("root/sprites");
                 ChristmasInDirtmouth.ResetPrefabMaterials(SpritePrefab);
 
+                // Initialize shop object
+                var go = GameObject.Instantiate(ShopPrefab);
+                go.transform.position = GameObject.Find("root/shop").gameObject.transform.position;
+                go.SetActive(true);
+
+                // Initilize shop UI menu object
                 // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/master/ItemChanger/Locations/CustomShopLocation.cs#L96
-                var menu = GameObject.Instantiate(ShopMenu);
+                GameObject menu = GameObject.Instantiate(ShopMenu);
                 menu.SetActive(true);
 
-                var itemList = menu.Find("Item List").gameObject;
+                //var itemList = menu.Find("Item List").gameObject;
+                //itemList.GetComponent<ShopMenuStock>();
+
+                // Modify the buy FSM to add a specific type
+                GameObject uilist = menu.Find("Confirm").gameObject.Find("UI List").gameObject;
+                PlayMakerFSM confirmFSM = uilist.LocateMyFSM("Confirm Control");
+                FsmState state = confirmFSM.GetValidState("Special Type?");
+                IntSwitch switchaction = (IntSwitch)state.GetAction(1);
+                //FsmInt[] compareTo = new FsmInt[switchaction.compareTo.Length+1];
+                FsmEvent[] sendEvent = new FsmEvent[switchaction.sendEvent.Length + 1];
+                Satchel.FsmUtil.AddCustomAction(state, () =>
+                    {
+                        Logger.Info(go.name.ToString() + " hit!");
+                        if (confirmFSM.FsmVariables.IntVariables[4].Value == 18)
+                        {
+                            Logger.Info("Christmas Item Bought!");
+                            Logger.Info("Item: " + confirmFSM.FsmVariables.IntVariables[1].Value.ToString() + " Cost: " + confirmFSM.FsmVariables.IntVariables[0].Value.ToString());
+                            // Reuse, normal event in switch action to trigger a complete
+                            switchaction.Event(sendEvent[0]);
+                        }
+                    }
+                );
+
+                
                 // Need to trigger initialization to inverstigate item list
                 //itemList.SetActive(true);
-
-
-                // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/master/ItemChanger/Locations/CustomShopLocation.cs#L117
-                var stock = itemList.GetComponent<ShopMenuStock>();
-                Logger.Info("Hereeee");
-                //Logger.Info(stock.masterList.ToString());
-
-                //stock.enabled = true; ;
-                ////stock.UpdateStock();
-
-                //UnityEngine.Component[] components = stock.GetComponents(typeof(UnityEngine.Component));
-                //foreach (UnityEngine.Component component in components)
-                //{
-                //    Logger.Info(component.ToString());
-                // }
-
-                //foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(stock))
-                //{
-                //    string name = descriptor.Name;
-                //    object value = descriptor.GetValue(stock);
-                //    Logger.Info("~ "+ name +  " - " + value.ToString());
-                //}
-
-                //GameObject[] stockInv = stock.stock;
-
-                //Logger.Info(stock.GetItemCount().ToString());
-
-                //for (int i = 0; i < stockInv.Length; i++)
-                //{
-                //    Logger.Info("---- " + stockInv.ToString());
-                //}
-
 
                 // Interesting FSM editting reference
                 // https://github.com/SFGrenade/TestOfTeamwork/blob/f2fb8212fa4cc2a725c29e57ca5e2675383adc82/src/MonoBehaviours/WeaverPrincessBossIntro.cs#L45
                 PlayMakerFSM fsm = go.LocateMyFSM("Shop Region");
 
-                Logger.Info("======= HERE ====== " + fsm.FsmVariables.GetFsmBool("Intro Msg").Value.ToString());
-
                 //fsm.FsmVariables.GetFsmBool("Relic Dealer").Value = false;
 
                 fsm.FsmVariables.GetFsmBool("Intro Msg").Value = true; // Edit here based on mod settings
-
                 // Skip and remove the edits to the player data variable "metSlyShop"
                 Satchel.FsmUtil.ChangeTransition(fsm, "Intro Convo?", "YES", "Title Up");
                 Satchel.FsmUtil.RemoveAction(fsm.GetValidState("Box Up"), 0);
-
                 // Skip any voice lines
                 Satchel.FsmUtil.ChangeTransition(fsm, "Box Up", "FINISHED", "Convo");
-
                 // Modify the main shop state "Shop Up"
                 var shopUp = fsm.GetValidState("Shop Up");
                 if (shopUp != null)
@@ -268,7 +259,7 @@ namespace ChristmasInDirtmouth
             self.stock[0].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_HEARTPIECE_1";
             self.stock[0].GetComponent<ShopItemStats>().descConvo = "INV_NAME_HEARTPIECE_1";
             self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
-            self.stock[0].GetComponent<ShopItemStats>().specialType = 0;
+            self.stock[0].GetComponent<ShopItemStats>().specialType = 18;
             self.stock[0].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
             self.stock[0].GetComponent<ShopItemStats>().playerDataBoolName = "";
             self.stock[0].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
@@ -280,7 +271,7 @@ namespace ChristmasInDirtmouth
             self.stock[1].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_HEARTPIECE_1";
             self.stock[1].GetComponent<ShopItemStats>().descConvo = "INV_NAME_HEARTPIECE_1";
             self.stock[1].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_2";
-            self.stock[1].GetComponent<ShopItemStats>().specialType = 0;
+            self.stock[1].GetComponent<ShopItemStats>().specialType = 18;
             self.stock[1].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
             self.stock[1].GetComponent<ShopItemStats>().playerDataBoolName = "";
             self.stock[1].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
