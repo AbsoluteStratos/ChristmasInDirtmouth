@@ -107,7 +107,6 @@ namespace ChristmasInDirtmouth
                 tp.sceneLoadVisualization = GameManager.SceneLoadVisualizations.Default;
 
                 
-
                 SpritePrefab = GameObject.Find("root/sprites");
                 ChristmasInDirtmouth.ResetPrefabMaterials(SpritePrefab);
 
@@ -123,6 +122,7 @@ namespace ChristmasInDirtmouth
 
                 var itemList = menu.Find("Item List").gameObject;
                 ShopMenuStock stock = itemList.GetComponent<ShopMenuStock>();
+                PlayMakerFSM fsmItemControl = itemList.LocateMyFSM("Item List Control");
 
                 // Modify the buy FSM to add a specific type
                 GameObject uilist = menu.Find("Confirm").gameObject.Find("UI List").gameObject;
@@ -133,16 +133,33 @@ namespace ChristmasInDirtmouth
                 FsmEvent[] sendEvent = new FsmEvent[switchaction.sendEvent.Length + 1];
                 Satchel.FsmUtil.AddCustomAction(state, () =>
                     {
-                        Logger.Info(go.name.ToString() + " hit!");
                         if (confirmFSM.FsmVariables.IntVariables[4].Value == 18)
                         {
-                            Logger.Info("Christmas Item Bought!");
-                            Logger.Info("Item: " + confirmFSM.FsmVariables.IntVariables[1].Value.ToString() + " Cost: " + confirmFSM.FsmVariables.IntVariables[0].Value.ToString());
+
+                            int cost = confirmFSM.FsmVariables.IntVariables[0].Value;
+                            // Item ID in the "Confirm Control" FSM is always 0 for some reason
+                            int itemMenuId = fsmItemControl.FsmVariables.IntVariables[3].Value;
+
+                            Logger.Info(String.Format("Christmas Item Bought: {0:D} for {0:D} geo", itemMenuId, cost));
                             // Reuse, normal event in switch action to trigger a complete
                             switchaction.Event(sendEvent[0]);
-
-                            boughtTest = true;
-
+                            // Set item in our inventory to true that we just bought. Index is based on position in shop
+                            int j = 0;
+                            for (int i = 0; i < ModItems.NUM_ITEMS; i++)
+                            {
+                                if (!ChristmasInDirtmouth.GlobalData.HeroInventory[i])
+                                {
+                                    if(j == itemMenuId)
+                                    {
+                                        ChristmasInDirtmouth.GlobalData.HeroInventory[i] = true;
+                                        i = ModItems.NUM_ITEMS;
+                                    }
+                                    else
+                                    {
+                                        j += 1;
+                                    }
+                                }
+                            }
                             // Used for inspiration
                             // https://github.com/homothetyhk/HollowKnight.ItemChanger/blob/a2bcdd59284ed6aa4e82ca308b4dc23105ccc72c/ItemChanger/Util/ShopUtil.cs#L98
                             MethodInfo dynMethod = stock.GetType().GetMethod("SpawnStock", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -151,34 +168,34 @@ namespace ChristmasInDirtmouth
                     }
                 );
 
-                
-                // Need to trigger initialization to inverstigate item list
-                //itemList.SetActive(true);
-
                 // Interesting FSM editting reference
                 // https://github.com/SFGrenade/TestOfTeamwork/blob/f2fb8212fa4cc2a725c29e57ca5e2675383adc82/src/MonoBehaviours/WeaverPrincessBossIntro.cs#L45
                 PlayMakerFSM fsm = go.LocateMyFSM("Shop Region");
-
-                //fsm.FsmVariables.GetFsmBool("Relic Dealer").Value = false;
-
-                fsm.FsmVariables.GetFsmBool("Intro Msg").Value = true; // Edit here based on mod settings
                 // Skip and remove the edits to the player data variable "metSlyShop"
                 Satchel.FsmUtil.ChangeTransition(fsm, "Intro Convo?", "YES", "Title Up");
                 Satchel.FsmUtil.RemoveAction(fsm.GetValidState("Box Up"), 0);
                 // Skip any voice lines
                 Satchel.FsmUtil.ChangeTransition(fsm, "Box Up", "FINISHED", "Convo");
-                // Modify the main shop state "Shop Up"
-                var shopUp = fsm.GetValidState("Shop Up");
-                if (shopUp != null)
-                {
-                    return; // already edited
-                }
-                Satchel.FsmUtil.ChangeTransition(fsm, "Relic Dealer?", "NO", "Regain Control");
+                // Handle intro message (modify the bool based on the ShopIntro)
+                fsm.FsmVariables.GetFsmBool("Intro Msg").Value = ChristmasInDirtmouth.GlobalData.ShopIntro;
+                state = fsm.GetValidState("Intro Convo?");
+                Satchel.FsmUtil.InsertCustomAction(state, () =>
+                    {
+                        if (!ChristmasInDirtmouth.GlobalData.ShopIntro)
+                        {
+                            // For some reason works, trying to set the value breaks stuff?
+                            go.LocateMyFSM("Shop Region").FsmVariables.GetFsmBool("Intro Msg").Clear();
+                        }
+                        ChristmasInDirtmouth.GlobalData.ShopIntro = false;
+                    }
+                , 0);
 
-
-                // Adding shop behavior
-                //GameObject root = GameObject.Find("root/shop").gameObject;
-                //root.AddComponent<ChristmasShopHandler>();
+                // Modify out of stock FSM to not play any audio (could replace)
+                fsm = menu.LocateMyFSM("shop_control");
+                state = fsm.GetValidState("Sly");
+                Satchel.FsmUtil.RemoveAction(state, 6);
+                Logger.Info(fsm.FsmVariables.GetFsmString("No Stock Event").Value);
+                Logger.Info(fsm.FsmVariables.GetFsmBool("Stock Left").Value.ToString());
 
                 Logger.Warning("Gate Set up");
             }
@@ -201,43 +218,17 @@ namespace ChristmasInDirtmouth
              //Logger.Info("==== " + key + "  " + sheetTitle + ": ");
             Debug.Log("==== " + key + "  " + sheetTitle + ": ");
             // Replacing NPC title (pulled from the FSM of the sly shop)
-            if (key == "SLY_SHOP_INTRO" && sheetTitle == "Sly")
+            if ((sheetTitle == "Sly" || sheetTitle == "Titles") && ModItems.NPCMap.ContainsKey(key))
             {
-                return "This is a test message <page> Test Message 2!";
+                return ModItems.NPCMap[key];
             }
-            else if (key == "SLY_MAIN" && sheetTitle == "Titles")
-            {
-                return "Merrywisp";
+            // Replacing UI / Price values if present
+            if (sheetTitle == "UI" && ModItems.ShopMap.ContainsKey(key)){
+                return ModItems.ShopMap[key];
             }
-            else if (key == "SLY_SUB" && sheetTitle == "Titles")
+            if (sheetTitle == "Prices" && ModItems.PriceMap.ContainsKey(key))
             {
-                return "";
-            }
-            else if (key == "SLY_SUPER" && sheetTitle == "Titles")
-            {
-                return "Festive Knight";
-            }
-
-            else if (key == "INV_NAME_CHRISTMAS_ITEM_1" && sheetTitle == "UI")
-            {
-                return "Garland and Wreaths";
-            }
-            else if (key == "SHOP_DESC_CHRISTMAS_ITEM_1" && sheetTitle == "UI")
-            {
-                return "A collection of festive garland thats sure to bring a cherry mood to the town.";
-            }
-
-            else if (key == "CHRISTMAS_ITEM_1" && sheetTitle == "Prices")
-            {
-                return "5";
-            }
-            else if (key == "CHRISTMAS_ITEM_2" && sheetTitle == "Prices")
-            {
-                return "10";
-            }
-            else if (key == "CHRISTMAS_ITEM_3" && sheetTitle == "Prices")
-            {
-                return "5";
+                return ModItems.PriceMap[key];
             }
             return orig;
         }
@@ -248,71 +239,45 @@ namespace ChristmasInDirtmouth
             if (!SceneActive) { orig(self); return; }
 
             self.itemCount = -1;
-            float num = 0f;
             self.stockInv = new GameObject[self.stock.Length];
 
             Logger.Error("rebuilding shop");
 
             Sprite itemSprite = SpritePrefab.Find("test").GetComponent<SpriteRenderer>().sprite;
-            CustomItemStats item1 = CustomItemStats.CreateNormalItem(itemSprite, "", "INV_NAME_HEARTPIECE_1", "SHOP_DESC_HEARTPIECE_1", 20);
-            CustomItemStats item2 = CustomItemStats.CreateNormalItem(itemSprite, "", "INV_NAME_HEARTPIECE_1", "SHOP_DESC_HEARTPIECE_1", 20);
-            CustomItemStats item3 = CustomItemStats.CreateNormalItem(itemSprite, "", "INV_NAME_HEARTPIECE_1", "SHOP_DESC_HEARTPIECE_1", 20);
-            CustomItemStats[] items = { item1, item2, item3 };
-
-            //stats.priceConvo = "CHRISTMAS_ITEM_1";
 
             GameObject prefab = self.stock[0];
-            if (!boughtTest)
+            // Initialize shop items
+            int itemCount = ChristmasInDirtmouth.GlobalData.HeroInventory.Where(c => !c).Count();
+            Logger.Warning(itemCount.ToString());
+            self.stock = new GameObject[itemCount];
+            int j = 0;
+            for (int i = 0; i < ModItems.NUM_ITEMS; i++)
             {
-                self.stock = new GameObject[2];
-
-                self.stock[0] = GameObject.Instantiate(prefab, prefab.transform.parent);
-                self.stock[0].GetComponent<ShopItemStats>().charmsRequired = 0;
-                self.stock[0].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_CHRISTMAS_ITEM_1";
-                self.stock[0].GetComponent<ShopItemStats>().descConvo = "SHOP_DESC_CHRISTMAS_ITEM_1";
-                self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
-                self.stock[0].GetComponent<ShopItemStats>().specialType = 18;
-                self.stock[0].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
-                self.stock[0].GetComponent<ShopItemStats>().playerDataBoolName = "";
-                self.stock[0].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
-                self.stock[0].SetActive(false);
-                self.stock[0].name = "Test_obj";
-
-
-                self.stock[1] = GameObject.Instantiate(prefab, prefab.transform.parent);
-                self.stock[1].GetComponent<ShopItemStats>().charmsRequired = 0;
-                self.stock[1].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_HEARTPIECE_1";
-                self.stock[1].GetComponent<ShopItemStats>().descConvo = "INV_NAME_HEARTPIECE_1";
-                self.stock[1].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_2";
-                self.stock[1].GetComponent<ShopItemStats>().specialType = 18;
-                self.stock[1].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
-                self.stock[1].GetComponent<ShopItemStats>().playerDataBoolName = "";
-                self.stock[1].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
-                self.stock[1].SetActive(false);
-                self.stock[1].name = "Test_obj_2";
-            }
-            else
-            {
-                self.stock = new GameObject[1];
-
-                self.stock[0] = GameObject.Instantiate(prefab, prefab.transform.parent);
-                self.stock[0].GetComponent<ShopItemStats>().charmsRequired = 0;
-                self.stock[0].GetComponent<ShopItemStats>().nameConvo = "INV_NAME_CHRISTMAS_ITEM_1";
-                self.stock[0].GetComponent<ShopItemStats>().descConvo = "SHOP_DESC_CHRISTMAS_ITEM_1";
-                self.stock[0].GetComponent<ShopItemStats>().priceConvo = "CHRISTMAS_ITEM_1";
-                self.stock[0].GetComponent<ShopItemStats>().specialType = 18;
-                self.stock[0].GetComponent<ShopItemStats>().requiredPlayerDataBool = "";
-                self.stock[0].GetComponent<ShopItemStats>().playerDataBoolName = "";
-                self.stock[0].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
-                self.stock[0].SetActive(false);
-                self.stock[0].name = "Test_obj";
+                // If item is not in the heros inventory
+                if (!ChristmasInDirtmouth.GlobalData.HeroInventory[i] && j < self.stock.Length)
+                {
+                    CustomItemStats item = ModItems.ChristmasItemStats[i];
+                    self.stock[j] = GameObject.Instantiate(prefab, prefab.transform.parent);
+                    self.stock[j].name = String.Format("ShopItem_{0:D}", i);
+                    self.stock[j].GetComponent<ShopItemStats>().nameConvo = item.nameConvo;
+                    self.stock[j].GetComponent<ShopItemStats>().descConvo = item.descConvo;
+                    self.stock[j].GetComponent<ShopItemStats>().priceConvo = item.priceConvo;
+                    self.stock[j].GetComponent<ShopItemStats>().requiredPlayerDataBool = item.requiredPlayerDataBool;
+                    self.stock[j].GetComponent<ShopItemStats>().playerDataBoolName = item.playerDataBoolName;
+                    self.stock[j].GetComponent<ShopItemStats>().specialType = item.specialType;
+                    self.stock[j].GetComponent<ShopItemStats>().charmsRequired = item.charmsRequired;
+                    self.stock[j].GetComponent<ShopItemStats>().relicNumber = item.relicNumber;
+                    self.stock[j].transform.Find("Item Sprite").GetComponent<SpriteRenderer>().sprite = itemSprite;
+                    self.stock[j].GetComponent<ShopItemStats>().itemNumber = i;
+                    self.stock[j].SetActive(false);
+                    j += 1;
+                }
             }
 
             var spawnedStock = new Dictionary<GameObject, GameObject>(self.stock.Length);
             GameObject[] array = self.stock;
             foreach (GameObject gameObject in array)
             {
-                Logger.Error("Setting go");
                 GameObject gameObject2 = GameObject.Instantiate(gameObject);
                 gameObject2.SetActive(value: false);
                 spawnedStock.Add(gameObject, gameObject2);

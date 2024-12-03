@@ -8,11 +8,13 @@ using UObject = UnityEngine.Object;
 
 namespace ChristmasInDirtmouth
 {
-    public class ChristmasInDirtmouth : Mod
+    public class ChristmasInDirtmouth : Mod, ILocalSettings<ModData>
     {
         new public static string GetName() => "Christmas In Dirtmouth";
-        public override string GetVersion() => "0.1.1";
+        public override string GetVersion() => "0.0.1";
 
+        internal static ModData GlobalData = new ModData();
+        internal static ModItems GlobalItems = new ModItems(); // Dont really need to save this but oh well
         internal static ChristmasInDirtmouth Instance;
 
         public Dictionary<string, Dictionary<string, GameObject>> preloads;
@@ -27,6 +29,7 @@ namespace ChristmasInDirtmouth
             Instance = this;
 
             ModHooks.HeroUpdateHook += OnHeroUpdate;
+            ModHooks.SavegameSaveHook += OnSaveGame;
 
             // Prepare classes from preloaded objects
             // https://github.com/PrashantMohta/Smolknight/blob/6a6253ca3ea6549cc17bff47c33ade2ac28054e7/Smolknight.cs#L134
@@ -57,17 +60,16 @@ namespace ChristmasInDirtmouth
                 ("Town", "_Scenery/point_light/HeroLight 3"),
                 ("Town","_Scenery/lamp_flys/flys"),
                 ("Room_shop", "Basement Closed/Shop Region"),
-                ("Room_shop", "Shop Menu"),
-                ("Ruins1_23", "Lift Call Lever")
+                ("Room_shop", "Shop Menu")
             };
         }
 
         public void OnHeroUpdate()
         {
-            /*if (Input.GetKeyDown(KeyCode.J))
+            if (Input.GetKeyDown(KeyCode.J))
             {
-                HeroController.instance.AddGeo(100);
-            }*/
+                HeroController.instance.AddGeo(1000);
+            }
             // Debugging / Dev util for jumping to new scene
             if (Input.GetKeyDown(KeyCode.O))
             {
@@ -85,6 +87,24 @@ namespace ChristmasInDirtmouth
                     forceWaitFetch = false
                 });
             }
+        }
+
+        public void OnSaveGame(int e)
+        {
+            // On save updated the saved inventory
+            GlobalData.HeroInventory.CopyTo(GlobalData.HeroInventorySaved, 0);
+        }
+
+        void ILocalSettings<ModData>.OnLoadLocal(ModData s)
+        {
+            GlobalData = s;
+            // Overwrite current inventory with current saved one
+            GlobalData.HeroInventorySaved.CopyTo(GlobalData.HeroInventory, 0);
+        }
+
+        ModData ILocalSettings<ModData>.OnSaveLocal()
+        {
+            return GlobalData;
         }
 
         // https://radiance.synthagen.net/apidocs/_images/Assets.html?highlight=getexecutingassembly#using-our-loaded-stuff
