@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FrogCore;
+using Satchel;
 using UnityEngine;
 
 namespace ChristmasInDirtmouth
@@ -13,7 +14,7 @@ namespace ChristmasInDirtmouth
         public static int NUM_ITEMS = ChristmasInDirtmouth.GlobalData.HeroInventory.Length;
 
         public static CustomItemStats[] ChristmasItemStats = new CustomItemStats[NUM_ITEMS];
-        
+
         public ModItems()
         {
             for (int i = 0; i < NUM_ITEMS; i++)
@@ -26,6 +27,14 @@ namespace ChristmasInDirtmouth
                     String.Format("CHRISTMAS_ITEM_{0:D}", i),
                     i
                );
+            }
+        }
+
+        public static void AddManagerConversations(CustomDialogueManager manager)
+        {
+            foreach (var item in NPCMap)
+            {
+                manager.AddConversation(item.Key, item.Value);
             }
         }
 
@@ -56,6 +65,9 @@ namespace ChristmasInDirtmouth
             { "SLY_MAIN", "Merrywisp" },
             { "SLY_SUB", "" },
             { "SLY_SUPER", "Festive Knight" },
+            { "MERRY_DIALOG_1", "Bless you, little one. You’ve a good eye for merriment. Safe travels now, and may your path be merry and bright!" },
+            { "MERRY_DIALOG_2", "I’ve gifts for the festive of heart! Trinkets, baubles, even charms to add some jolly jingle to your journey. Come now, take a look. Bring a bit of brightness to this gloomy kingdom." },
+            { "MERRY_DIALOG_3", "Still here? Or perhaps you’re savoring the cheer? No rush, no rush... The season is for sharing, after all!" },
         };
     }
 

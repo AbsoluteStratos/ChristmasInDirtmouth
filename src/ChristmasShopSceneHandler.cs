@@ -19,6 +19,7 @@ using System.ComponentModel;
 using System.Collections;
 using FrogCore;
 using HutongGames.PlayMaker;
+using GlobalEnums;
 
 
 namespace ChristmasInDirtmouth
@@ -36,10 +37,9 @@ namespace ChristmasInDirtmouth
         private static GameObject ShopPrefab, ShopMenu, SpritePrefab;
         private static bool SceneActive = false;
 
-
         private bool boughtTest = false;
 
-        public ChristmasShopSceneHandler(GameObject refTileMap, GameObject refSceneManager, GameObject shopRegion, GameObject shopMenu)
+        public ChristmasShopSceneHandler(GameObject refTileMap, GameObject refSceneManager, GameObject shopRegion, GameObject shopMenu, GameObject corniferCard)
         {
             ModHooks.LanguageGetHook += OnLanguageGet;
             //On.ShopMenuStock.BuildItemList += BuildItemList;
@@ -109,6 +109,9 @@ namespace ChristmasInDirtmouth
                 
                 SpritePrefab = GameObject.Find("root/sprites");
                 ChristmasInDirtmouth.ResetPrefabMaterials(SpritePrefab);
+
+                GameObject npc = GameObject.Find("root/npc").gameObject;
+                npc.AddComponent<NPCDialog>();
 
                 // Initialize shop object
                 var go = GameObject.Instantiate(ShopPrefab);
@@ -288,6 +291,88 @@ namespace ChristmasInDirtmouth
             var masterStock = self.masterList.GetComponent<ShopMenuStock>();
             masterStock.stock = self.stock;
             orig(self);
+        }
+    }
+
+    public class NPCDialog : MonoBehaviour
+    {
+        private GameManager gm;
+        private GameObject doorArrowPrompt;
+        private CustomDialogueManager dialogManager;
+
+        private bool active = false;
+
+        private void Awake()
+        {
+            ModHooks.HeroUpdateHook += OnHeroUpdate;
+            gm = GameManager.instance;
+            // Needs preloads["Cliffs_01"]["Cornifer Card"]; on mod init
+            // Assumes CustomArrowPrompt.Prepare(CardPrefab); has been called
+            doorArrowPrompt = CreatePromptPrehab();
+            doorArrowPrompt.SetActive(true);
+        }
+
+        private GameObject CreatePromptPrehab(string text = "LISTEN")
+        {
+            // Needs preloads["Cliffs_01"]["Cornifer Card"]; on mod init
+            // Assumes CustomArrowPrompt.Prepare(CardPrefab); has been called
+            // https://github.com/PrashantMohta/Satchel/blob/2e922c2939ae35af0a256b5edd1792db0dbf0c92/Custom/CustomArrowPrompt.cs
+            GameObject prefab = new GameObject("NPC Arrow");
+            prefab.transform.position = transform.Find("Prompt Marker").position;
+            CustomArrowPrompt.GetAddCustomArrowPrompt(prefab, text, null);
+            prefab.SetActive(false);
+            DontDestroyOnLoad(prefab);
+
+            return prefab;
+        }
+
+        void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.name == "Knight")
+            {
+                active = true;
+            }
+        }
+
+        void OnTriggerStay2D(Collider2D other)
+        {
+            if (other.name == "Knight" && Mathf.Abs(other.attachedRigidbody.velocity.x) < 0.1 && active)
+            {
+                doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Show();
+            }
+        }
+
+        void OnTriggerExit2D(Collider2D other)
+        {
+            if (other.name == "Knight")
+            {
+                active = false;
+                doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Hide();
+            }
+        }
+
+        public void OnHeroUpdate()
+        {
+            // In the modding tutorial you will see the use of Input.GetKeyDown
+            // We dont use that here because we want to be agnostic to the key bind for up and also support controllers
+            // User the inputHanlder instead
+            if (GameManager.instance.inputHandler.inputActions.up.IsPressed && active)
+            {
+                active = false;
+                doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Hide();
+                if (ChristmasInDirtmouth.GlobalData.ShopIntro)
+                {
+                    ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue("SLY_SHOP_INTRO");
+                    ChristmasInDirtmouth.GlobalData.ShopIntro = false;
+                }
+                else
+                {
+                    // Random dialog
+                    System.Random rnd = new System.Random();
+                    ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue(String.Format("MERRY_DIALOG_{0:d}", rnd.Next(1, 4)));
+                }
+                
+            }
         }
     }
 }

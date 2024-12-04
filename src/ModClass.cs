@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Modding;
 using UnityEngine;
 using UObject = UnityEngine.Object;
+using Satchel;
 
 namespace ChristmasInDirtmouth
 {
@@ -13,6 +14,7 @@ namespace ChristmasInDirtmouth
         new public static string GetName() => "Christmas In Dirtmouth";
         public override string GetVersion() => "0.0.1";
 
+        public static CustomDialogueManager MerryDialogueManager;
         internal static ModData GlobalData = new ModData();
         internal static ModItems GlobalItems = new ModItems(); // Dont really need to save this but oh well
         internal static ChristmasInDirtmouth Instance;
@@ -35,6 +37,9 @@ namespace ChristmasInDirtmouth
             // https://github.com/PrashantMohta/Smolknight/blob/6a6253ca3ea6549cc17bff47c33ade2ac28054e7/Smolknight.cs#L134
             // Arrow prompt
             Satchel.CustomArrowPrompt.Prepare(preloadedObjects["Cliffs_01"]["Cornifer Card"]);
+            // Dialog manager
+            MerryDialogueManager = new Satchel.CustomDialogueManager(preloadedObjects["Cliffs_01"]["Cornifer Card"]);
+            ModItems.AddManagerConversations(MerryDialogueManager);
 
             // Create scene handlers
             dirtmouthHandler = new DirtmouthSceneHandler();
@@ -42,7 +47,8 @@ namespace ChristmasInDirtmouth
                 preloadedObjects["Room_mapper"]["TileMap"],
                 preloadedObjects["Room_mapper"]["_SceneManager"],
                 preloadedObjects["Room_shop"]["Basement Closed/Shop Region"],
-                preloadedObjects["Room_shop"]["Shop Menu"]
+                preloadedObjects["Room_shop"]["Shop Menu"],
+                preloadedObjects["Cliffs_01"]["Cornifer Card"]
             );
 
             Logger.Info("Initialized");
@@ -97,7 +103,7 @@ namespace ChristmasInDirtmouth
 
         void ILocalSettings<ModData>.OnLoadLocal(ModData s)
         {
-            GlobalData = s;
+            //GlobalData = s;
             // Overwrite current inventory with current saved one
             GlobalData.HeroInventorySaved.CopyTo(GlobalData.HeroInventory, 0);
         }
