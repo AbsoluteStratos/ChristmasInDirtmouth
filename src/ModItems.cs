@@ -40,15 +40,15 @@ namespace ChristmasInDirtmouth
 
         public static Dictionary<string, string> ShopMap = new Dictionary<string, string> {
             { "INV_NAME_CHRISTMAS_ITEM_0", "Garland and Wreaths" },
-            { "INV_NAME_CHRISTMAS_ITEM_1", "Town Presents" },
-            { "INV_NAME_CHRISTMAS_ITEM_2", "Candles" },
+            { "INV_NAME_CHRISTMAS_ITEM_1", "Festive Presents" },
+            { "INV_NAME_CHRISTMAS_ITEM_2", "Peaceful Candles" },
             { "INV_NAME_CHRISTMAS_ITEM_3", "Holiday Tree" },
             { "INV_NAME_CHRISTMAS_ITEM_4", "String Lights" },
-            { "SHOP_DESC_CHRISTMAS_ITEM_0", "A collection of festive garland thats sure to bring a cherry mood to the town." },
-            { "SHOP_DESC_CHRISTMAS_ITEM_1", "Present decorations scatter across town to reflect the season of giving." },
-            { "SHOP_DESC_CHRISTMAS_ITEM_2", "Peaceful candles and decorations around the towns buildings." },
-            { "SHOP_DESC_CHRISTMAS_ITEM_3", "A large decorated tree in the center of Dirtmouth. Certainly a good way to bring cheer to all bugs." },
-            { "SHOP_DESC_CHRISTMAS_ITEM_4", "Light up the town with an abundance of festive lights" },
+            { "SHOP_DESC_CHRISTMAS_ITEM_0", "Twisting vines of greenpath moss and fungi, adorned with delicate crystal berries. A symbol of resilience and unity, even in the harshest winters. Their soft shimmer promises to brighten any dark corner." },
+            { "SHOP_DESC_CHRISTMAS_ITEM_1", "Carefully wrapped treasures of unknown contents. A gift for the curious and the kindhearted, brimming with the mystery of seasonal delight. Who knows what wonders might lie within?" },
+            { "SHOP_DESC_CHRISTMAS_ITEM_2", "Simple waxen pillars with flames that flicker like gentle whispers. Their steady glow calms the restless soul and wards off shadows. A reminder of tranquility in the ever-turning gloom." },
+            { "SHOP_DESC_CHRISTMAS_ITEM_3", "A large, ancient sapling draped in luminous moss and adorned with tiny baubles. A token of evergreen hope, its presence fills the air with a faint, nostalgic warmth. Bound to bring any bug happiness." },
+            { "SHOP_DESC_CHRISTMAS_ITEM_4", "Threads of delicate luminescence, crafted from hollowed firefly shells. Their soft hum brings a comforting glow, weaving light through even the most winding of paths." },
         };
 
         public static Dictionary<string, string> PriceMap = new Dictionary<string, string> {

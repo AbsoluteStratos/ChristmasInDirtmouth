@@ -109,6 +109,7 @@ namespace ChristmasInDirtmouth
                 
                 SpritePrefab = GameObject.Find("root/sprites");
                 ChristmasInDirtmouth.ResetPrefabMaterials(SpritePrefab);
+                SpritePrefab.SetActive(false);
 
                 GameObject npc = GameObject.Find("root/npc").gameObject;
                 npc.AddComponent<NPCDialog>();
@@ -246,8 +247,6 @@ namespace ChristmasInDirtmouth
 
             Logger.Error("rebuilding shop");
 
-            Sprite itemSprite = SpritePrefab.Find("test").GetComponent<SpriteRenderer>().sprite;
-
             GameObject prefab = self.stock[0];
             // Initialize shop items
             int itemCount = ChristmasInDirtmouth.GlobalData.HeroInventory.Where(c => !c).Count();
@@ -259,6 +258,7 @@ namespace ChristmasInDirtmouth
                 // If item is not in the heros inventory
                 if (!ChristmasInDirtmouth.GlobalData.HeroInventory[i] && j < self.stock.Length)
                 {
+                    Sprite itemSprite = SpritePrefab.Find(String.Format("{0:D}", i)).GetComponent<SpriteRenderer>().sprite;
                     CustomItemStats item = ModItems.ChristmasItemStats[i];
                     self.stock[j] = GameObject.Instantiate(prefab, prefab.transform.parent);
                     self.stock[j].name = String.Format("ShopItem_{0:D}", i);
