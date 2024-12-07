@@ -44,8 +44,8 @@ namespace ChristmasInDirtmouth
             // Create scene handlers
             dirtmouthHandler = new DirtmouthSceneHandler();
             shopHandler = new ChristmasShopSceneHandler(
-                preloadedObjects["Room_mapper"]["TileMap"],
-                preloadedObjects["Room_mapper"]["_SceneManager"],
+                preloadedObjects["Crossroads_38"]["TileMap"],
+                preloadedObjects["Crossroads_38"]["_SceneManager"],
                 preloadedObjects["Room_shop"]["Basement Closed/Shop Region"],
                 preloadedObjects["Room_shop"]["Shop Menu"],
                 preloadedObjects["Cliffs_01"]["Cornifer Card"]
@@ -60,9 +60,8 @@ namespace ChristmasInDirtmouth
             return new List<(string, string)>
             {
                 ("Cliffs_01","Cornifer Card"),
-                ("Room_mapper","TileMap"),
-                ("Room_mapper","TileMap Render Data"),
-                ("Room_mapper","_SceneManager"),
+                ("Crossroads_38","TileMap"),
+                ("Crossroads_38","_SceneManager"),
                 ("Town", "_Scenery/point_light/HeroLight 3"),
                 ("Town","_Scenery/lamp_flys/flys"),
                 ("Room_shop", "Basement Closed/Shop Region"),

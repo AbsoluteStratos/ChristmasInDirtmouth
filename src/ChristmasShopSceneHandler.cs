@@ -42,8 +42,9 @@ namespace ChristmasInDirtmouth
         public ChristmasShopSceneHandler(GameObject refTileMap, GameObject refSceneManager, GameObject shopRegion, GameObject shopMenu, GameObject corniferCard)
         {
             ModHooks.LanguageGetHook += OnLanguageGet;
-            //On.ShopMenuStock.BuildItemList += BuildItemList;
             On.ShopMenuStock.SpawnStock += SpawnStock;
+            On.AudioManager.BeginApplyMusicCue += OnAudioManagerBeginApplyMusicCue;
+            //On.AudioManager.BeginApplyAtmosCue += OnAudioManagerBeginApplyAtmosCue;
 
             // Load scene bundle
             Assembly asm = Assembly.GetExecutingAssembly();
@@ -56,19 +57,30 @@ namespace ChristmasInDirtmouth
                 bundle = AssetBundle.LoadFromMemory(buffer);
             }
             Path = bundle.GetAllScenePaths()[0];
-            
+
+            Logger.Info(refSceneManager.GetType().ToString());
+            SceneManager manager = refSceneManager.GetComponent<SceneManager>();
+            //FieldInfo atmosQue = typeof(SceneManager).GetField("atmosCue", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            //AudioManager.
+            //AtmosCue origAudio = ReflectionHelper.GetField<SceneManager, AtmosCue>(manager, "atmosCue");
+            //origAudio.d
+
 
             // Use Satchel to create a custome scene
             // https://github.com/PrashantMohta/Satchel/blob/master/Core.cs#L177
             sceneObj = satchelCore.GetCustomScene(ChristmasShopSceneHandler.Name, refTileMap, refSceneManager);
             sceneObj.OnLoaded += SceneOnload;
-
             // Can edit properties in the settings object, will by default use the value in the reference scene manager
             // which is the mappers store room in this case
             // https://github.com/PrashantMohta/Satchel/blob/master/Utils/SceneUtils.cs#L36
             CustomSceneManagerSettings settings = new SceneUtils.CustomSceneManagerSettings(refSceneManager.GetComponent<SceneManager>());
-            settings.saturation = 1.2f;
-            settings.heroLightColor = new Color(1.0f, 0.95f, 0.55f, 0.05f);
+            settings.saturation = 1.0f;
+            settings.heroLightColor = new Color(1.0f, 0.95f, 0.55f, 0.25f);
+            settings.isWindy = false;
+            settings.defaultColor = new Color(1.0f, 0.95f, 0.55f, 0.8f);
+            // 0 = Dust, 1 = Grass, 2 = Bone, 3 = Spa, 4 = Metal, 5 = No Effect, 6 = Wet
+            settings.environmentType = 1;
             sceneObj.Config(40, 25, settings);
             // Satchel will handle set up of the scene manager, but we need our own call back for modifying objects
             // Add call back to load the scene on change
@@ -86,6 +98,28 @@ namespace ChristmasInDirtmouth
             SceneActive = (to.name == ChristmasShopSceneHandler.Name);
             if (SceneActive)
             {
+
+                //AudioSource[] sources = GameObject.FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
+                //foreach (AudioSource audioSource in sources)
+                //{
+                //    if (audioSource.isPlaying) Logger.Info(audioSource.name + " is playing " + audioSource.clip.name + audioSource.clip.name.Contains("wind").ToString());
+                //    if (audioSource.isPlaying && audioSource.clip.name.Contains("wind")){
+                //        audioSource.Stop();
+                //    }
+                //    audioSource.Stop();
+                //}
+                //foreach (AudioSource audioSource in sources)
+                //{
+                //    if (audioSource.isPlaying) Logger.Info(audioSource.name + " is playing " + audioSource.clip.name + audioSource.clip.name.Contains("wind").ToString());
+                //    if (audioSource.isPlaying && audioSource.clip.name.Contains("wind"))
+                //    {
+                //        audioSource.Stop();
+                //    }
+                //    audioSource.Stop();
+                //}
+
+                AudioSource audio = GameObject.Find("root/audio").GetComponent<AudioSource>();
+                audio.Play();
 
                 //ChristmasInDirtmouth.ResetPrefabMaterials(GameObject.Find("root"));
                 Logger.Info("Casino interior scene change");
@@ -106,9 +140,9 @@ namespace ChristmasInDirtmouth
                 tp.respawnMarker.respawnFacingRight = true;
                 tp.sceneLoadVisualization = GameManager.SceneLoadVisualizations.Default;
 
-                
+
+                ChristmasInDirtmouth.ResetPrefabMaterials(GameObject.Find("root"));
                 SpritePrefab = GameObject.Find("root/sprites");
-                ChristmasInDirtmouth.ResetPrefabMaterials(SpritePrefab);
                 SpritePrefab.SetActive(false);
 
                 GameObject npc = GameObject.Find("root/npc").gameObject;
@@ -292,6 +326,60 @@ namespace ChristmasInDirtmouth
             masterStock.stock = self.stock;
             orig(self);
         }
+
+        // https://github.com/SFGrenade/CustomBgm/blob/master/src/CustomBgm.cs
+        private IEnumerator OnAudioManagerBeginApplyMusicCue(On.AudioManager.orig_BeginApplyMusicCue orig, AudioManager self, MusicCue musicCue, float delayTime, float transitionTime, bool applySnapshot)
+        {
+            if (SceneActive)
+            {
+                musicCue = ScriptableObject.CreateInstance<MusicCue>();
+
+                MusicCue.MusicChannelInfo channel = new MusicCue.MusicChannelInfo();
+
+
+            //    FileStream stream = File.OpenRead($"{_dir}/{origName}.wav");
+            //    WavData.Inspect(stream, DebugLog);
+            //    WavData wavData = new WavData();
+            //    wavData.Parse(stream, DebugLog);
+            //    stream.Close();
+
+
+
+            //    ReflectionHelper.SetField<MusicCue.MusicChannelInfo, AudioClip>(channel, "clip", possibleReplace);
+
+            //    bool changed = false;
+            //    MusicCue.MusicChannelInfo[] infos = ReflectionHelper.GetField<MusicCue, MusicCue.MusicChannelInfo[]>(musicCue, "channelInfos");
+
+            //    foreach (MusicCue.MusicChannelInfo info in infos)
+            //    {
+            //        AudioClip origAudio = ReflectionHelper.GetField<MusicCue.MusicChannelInfo, AudioClip>(info, "clip");
+
+            //        if (origAudio != null)
+            //        {
+            //            AudioClip possibleReplace = GetAudioClip(origAudio.name);
+            //            if (possibleReplace != null)
+            //            {
+            //                // Change Audio Clip
+            //                ReflectionHelper.SetField<MusicCue.MusicChannelInfo, AudioClip>(info, "clip", possibleReplace);
+            //                changed = true;
+            //            }
+            //        }
+            //    }
+            }
+
+            //if (changed) ReflectionHelper.SetField<MusicCue, MusicCue.MusicChannelInfo[]>(musicCue, "channelInfos", infos);
+
+            yield return orig(self, musicCue, delayTime, transitionTime, applySnapshot);
+        }
+
+        private IEnumerator OnAudioManagerBeginApplyAtmosCue(On.AudioManager.orig_BeginApplyAtmosCue orig, AudioManager self, AtmosCue musicCue, float transitionTime)
+        {
+            if (SceneActive)
+            {
+                musicCue = ScriptableObject.CreateInstance<AtmosCue>();
+            }
+            yield return orig(self, musicCue, 0.1f);
+        }
     }
 
     public class NPCDialog : MonoBehaviour
@@ -301,6 +389,7 @@ namespace ChristmasInDirtmouth
         private CustomDialogueManager dialogManager;
 
         private bool active = false;
+        private int prev_convo = -1;
 
         private void Awake()
         {
@@ -363,13 +452,21 @@ namespace ChristmasInDirtmouth
                 if (ChristmasInDirtmouth.GlobalData.ShopIntro)
                 {
                     ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue("SLY_SHOP_INTRO");
-                    ChristmasInDirtmouth.GlobalData.ShopIntro = false;
+                    //ChristmasInDirtmouth.GlobalData.ShopIntro = false;
                 }
                 else
                 {
                     // Random dialog
                     System.Random rnd = new System.Random();
-                    ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue(String.Format("MERRY_DIALOG_{0:d}", rnd.Next(1, 4)));
+                    int index = rnd.Next(1, 4);
+                    // Ensure we dont get the same message twice in a row
+                    if (prev_convo == index)
+                    {
+                        index += 1;
+                        if (index == 4) { index = 1; }
+                    }
+                    ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue(String.Format("MERRY_DIALOG_{0:d}", index));
+                    prev_convo = index;
                 }
                 
             }
