@@ -50,14 +50,14 @@ namespace ChristmasInDirtmouth
                 // Note that doors are a little more tricky than other gates, other gates will run the animation for you but not doors
                 // So instead what we will do is listen for the up / enter key press then trigger the transition and animation ourselves
                 // See CasinoTownDoorHandler
-                GameObject gate = objab.transform.Find("ChristmasShop/door_christmas_shop").gameObject;
+                GameObject gate = objab.transform.Find("door_christmas_shop").gameObject;
                 gate.AddComponent<ChristmasShopDoorHandler>();
                 var tp = gate.AddComponent<TransitionPoint>();
                 tp.isADoor = true;
                 tp.alwaysEnterLeft = false;
                 tp.alwaysEnterRight = false;
 
-                GameObject rm = objab.transform.Find("ChristmasShop/door_christmas_shop/Hazard Respawn Marker").gameObject;
+                GameObject rm = objab.transform.Find("door_christmas_shop/Hazard Respawn Marker").gameObject;
                 tp.respawnMarker = rm.AddComponent<HazardRespawnMarker>();
                 tp.respawnMarker.respawnFacingRight = true;
                 tp.sceneLoadVisualization = GameManager.SceneLoadVisualizations.Default;

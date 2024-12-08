@@ -58,15 +58,6 @@ namespace ChristmasInDirtmouth
             }
             Path = bundle.GetAllScenePaths()[0];
 
-            Logger.Info(refSceneManager.GetType().ToString());
-            SceneManager manager = refSceneManager.GetComponent<SceneManager>();
-            //FieldInfo atmosQue = typeof(SceneManager).GetField("atmosCue", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            //AudioManager.
-            //AtmosCue origAudio = ReflectionHelper.GetField<SceneManager, AtmosCue>(manager, "atmosCue");
-            //origAudio.d
-
-
             // Use Satchel to create a custome scene
             // https://github.com/PrashantMohta/Satchel/blob/master/Core.cs#L177
             sceneObj = satchelCore.GetCustomScene(ChristmasShopSceneHandler.Name, refTileMap, refSceneManager);
@@ -98,31 +89,12 @@ namespace ChristmasInDirtmouth
             SceneActive = (to.name == ChristmasShopSceneHandler.Name);
             if (SceneActive)
             {
-
-                //AudioSource[] sources = GameObject.FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
-                //foreach (AudioSource audioSource in sources)
-                //{
-                //    if (audioSource.isPlaying) Logger.Info(audioSource.name + " is playing " + audioSource.clip.name + audioSource.clip.name.Contains("wind").ToString());
-                //    if (audioSource.isPlaying && audioSource.clip.name.Contains("wind")){
-                //        audioSource.Stop();
-                //    }
-                //    audioSource.Stop();
-                //}
-                //foreach (AudioSource audioSource in sources)
-                //{
-                //    if (audioSource.isPlaying) Logger.Info(audioSource.name + " is playing " + audioSource.clip.name + audioSource.clip.name.Contains("wind").ToString());
-                //    if (audioSource.isPlaying && audioSource.clip.name.Contains("wind"))
-                //    {
-                //        audioSource.Stop();
-                //    }
-                //    audioSource.Stop();
-                //}
-
+                // Back ground music
                 AudioSource audio = GameObject.Find("root/audio").GetComponent<AudioSource>();
                 audio.Play();
 
                 //ChristmasInDirtmouth.ResetPrefabMaterials(GameObject.Find("root"));
-                Logger.Info("Casino interior scene change");
+                Logger.Info("Christmas shop interior scene change");
                 // Manually replicating because I already have game objects in the scene
                 // https://github.com/PrashantMohta/Satchel/blob/master/Utils/SceneUtils.cs#L144
                 GameObject gate = GameObject.Find(ChristmasShopSceneHandler.Gate).gameObject;
@@ -241,7 +213,7 @@ namespace ChristmasInDirtmouth
 
         private void SceneOnload(object sender, SceneLoadedEventArgs e)
         {
-            Logger.Info("Casino Scene loading complete");
+            Logger.Info("Christmas Shop Scene loading complete");
         }
 
 
@@ -322,53 +294,22 @@ namespace ChristmasInDirtmouth
 
             // Edit the master component
             // Can be some odd null reference here, but trying to catch is cases some error?
-            var masterStock = self.masterList.GetComponent<ShopMenuStock>();
-            masterStock.stock = self.stock;
-            orig(self);
+            if (self.masterList.GetType() == typeof(GameObject))
+            {
+                var masterStock = self.masterList.GetComponent<ShopMenuStock>();
+                masterStock.stock = self.stock;
+                orig(self);
+            }
         }
 
         // https://github.com/SFGrenade/CustomBgm/blob/master/src/CustomBgm.cs
         private IEnumerator OnAudioManagerBeginApplyMusicCue(On.AudioManager.orig_BeginApplyMusicCue orig, AudioManager self, MusicCue musicCue, float delayTime, float transitionTime, bool applySnapshot)
         {
+            // Mute the background music in the scene to replace with our own
             if (SceneActive)
             {
                 musicCue = ScriptableObject.CreateInstance<MusicCue>();
-
-                MusicCue.MusicChannelInfo channel = new MusicCue.MusicChannelInfo();
-
-
-            //    FileStream stream = File.OpenRead($"{_dir}/{origName}.wav");
-            //    WavData.Inspect(stream, DebugLog);
-            //    WavData wavData = new WavData();
-            //    wavData.Parse(stream, DebugLog);
-            //    stream.Close();
-
-
-
-            //    ReflectionHelper.SetField<MusicCue.MusicChannelInfo, AudioClip>(channel, "clip", possibleReplace);
-
-            //    bool changed = false;
-            //    MusicCue.MusicChannelInfo[] infos = ReflectionHelper.GetField<MusicCue, MusicCue.MusicChannelInfo[]>(musicCue, "channelInfos");
-
-            //    foreach (MusicCue.MusicChannelInfo info in infos)
-            //    {
-            //        AudioClip origAudio = ReflectionHelper.GetField<MusicCue.MusicChannelInfo, AudioClip>(info, "clip");
-
-            //        if (origAudio != null)
-            //        {
-            //            AudioClip possibleReplace = GetAudioClip(origAudio.name);
-            //            if (possibleReplace != null)
-            //            {
-            //                // Change Audio Clip
-            //                ReflectionHelper.SetField<MusicCue.MusicChannelInfo, AudioClip>(info, "clip", possibleReplace);
-            //                changed = true;
-            //            }
-            //        }
-            //    }
             }
-
-            //if (changed) ReflectionHelper.SetField<MusicCue, MusicCue.MusicChannelInfo[]>(musicCue, "channelInfos", infos);
-
             yield return orig(self, musicCue, delayTime, transitionTime, applySnapshot);
         }
 
@@ -378,7 +319,7 @@ namespace ChristmasInDirtmouth
             {
                 musicCue = ScriptableObject.CreateInstance<AtmosCue>();
             }
-            yield return orig(self, musicCue, 0.1f);
+            yield return orig(self, musicCue, transitionTime);
         }
     }
 
