@@ -1,0 +1,63 @@
+ManifestFileVersion: 0
+CRC: 642535173
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1adc6630dc6f2f2fd83f063d1d430825
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 8f9f974d23806a69e33f6172567024e6
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 61
+  Script: {instanceID: 0}
+- Class: 62
+  Script: {instanceID: 0}
+- Class: 68
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 104
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: d4ea7327cd9fa2a41ae4c7cee5b9180a, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 315b6d2463669124586f57520d2ce601, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 157
+  Script: {instanceID: 0}
+- Class: 196
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/ChristmasInDirtmouth/Shop/ChristmasShopScene.unity
+Dependencies: []
