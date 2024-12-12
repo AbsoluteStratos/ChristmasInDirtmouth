@@ -38,9 +38,9 @@ namespace ChristmasInDirtmouth
         }
 
         public static Dictionary<string, string> ShopMap = new Dictionary<string, string> {
-            { "INV_NAME_CHRISTMAS_ITEM_0", "Garland and Wreaths" },
-            { "INV_NAME_CHRISTMAS_ITEM_1", "Festive Presents" },
-            { "INV_NAME_CHRISTMAS_ITEM_2", "Peaceful Candles" },
+            { "INV_NAME_CHRISTMAS_ITEM_0", "Garland" },
+            { "INV_NAME_CHRISTMAS_ITEM_1", "Presents" },
+            { "INV_NAME_CHRISTMAS_ITEM_2", "Candles" },
             { "INV_NAME_CHRISTMAS_ITEM_3", "Holiday Tree" },
             { "INV_NAME_CHRISTMAS_ITEM_4", "String Lights" },
             { "SHOP_DESC_CHRISTMAS_ITEM_0", "Twisting vines of greenpath moss and fungi, adorned with delicate crystal berries. A symbol of resilience and unity, even in the harshest winters. Their soft shimmer promises to brighten any dark corner." },

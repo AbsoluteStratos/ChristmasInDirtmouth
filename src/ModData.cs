@@ -14,5 +14,11 @@ namespace ChristmasInDirtmouth
         // Active Inventory
         public bool[] HeroInventory = new bool[] { false, false, false, false, false };
 
+
+        public void Reset()
+        {
+            ShopIntro = true;
+            HeroInventory = new bool[] { false, false, false, false, false };
+        }
     }
 }

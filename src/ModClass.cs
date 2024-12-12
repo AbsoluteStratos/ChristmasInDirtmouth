@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections;
-using GlobalEnums;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Modding;
 using UnityEngine;
-using UObject = UnityEngine.Object;
 using Satchel;
+using Satchel.BetterMenus;
 
 namespace ChristmasInDirtmouth
 {
-    public class ChristmasInDirtmouth : Mod, ILocalSettings<ModData>
+    public class ChristmasInDirtmouth : Mod, ILocalSettings<ModData>, ICustomMenuMod, ITogglableMod
     {
         new public static string GetName() => "Christmas In Dirtmouth";
-        public override string GetVersion() => "0.0.1";
+        public override string GetVersion() => "1.0.0";
 
         public static CustomDialogueManager MerryDialogueManager;
         internal static ModData GlobalData = new ModData();
@@ -24,6 +21,7 @@ namespace ChristmasInDirtmouth
         private DirtmouthSceneHandler dirtmouthHandler;
         private ChristmasShopSceneHandler shopHandler;
         private EasterEggHandler easterEggHandler;
+        private Menu MenuRef;
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -72,11 +70,11 @@ namespace ChristmasInDirtmouth
 
         public void OnHeroUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                HeroController.instance.AddGeo(1000);
-            }
             // Debugging / Dev util for jumping to new scene
+            //if (Input.GetKeyDown(KeyCode.J))
+            //{
+            //    HeroController.instance.AddGeo(1000);
+            //}
             //if (Input.GetKeyDown(KeyCode.O))
             //{
             //    // Quick jump to casino for testing, remove
@@ -103,6 +101,25 @@ namespace ChristmasInDirtmouth
         ModData ILocalSettings<ModData>.OnSaveLocal()
         {
             return GlobalData;
+        }
+
+        public MenuScreen GetMenuScreen(MenuScreen modListMenu, ModToggleDelegates? modtoggledelegates)
+        {
+            if (MenuRef == null)
+            {
+                MenuRef = ModMenu.PrepareMenu((ModToggleDelegates)modtoggledelegates);
+            }
+            return MenuRef.GetMenuScreen(modListMenu);
+        }
+
+        public bool ToggleButtonInsideMenu => true;
+
+        public void Unload()
+        {
+            Logger.Warning("Christmas in Dirtmouth unloaded");
+            dirtmouthHandler = null;
+            shopHandler = null;
+            easterEggHandler = null;
         }
 
         // https://radiance.synthagen.net/apidocs/_images/Assets.html?highlight=getexecutingassembly#using-our-loaded-stuff
