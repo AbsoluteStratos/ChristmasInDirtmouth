@@ -13,14 +13,6 @@ namespace ChristmasInDirtmouth
 
         // Active Inventory
         public bool[] HeroInventory = new bool[] { false, false, false, false, false };
-        // Saved Inventory only set during bench save (need to set a hook for this)
-        // The combo of these two allow us to one keep the updates after saving like other items
-        public bool[] HeroInventorySaved = new bool[] { false, false, false, false, false };
-
-        public ModData() {
-            // Assign the active inventory to saved one
-            HeroInventorySaved.CopyTo(HeroInventory, 0);
-        }
 
     }
 }

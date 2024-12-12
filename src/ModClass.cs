@@ -32,7 +32,6 @@ namespace ChristmasInDirtmouth
             Instance = this;
 
             ModHooks.HeroUpdateHook += OnHeroUpdate;
-            ModHooks.SavegameSaveHook += OnSaveGame;
 
             // Prepare classes from preloaded objects
             // https://github.com/PrashantMohta/Smolknight/blob/6a6253ca3ea6549cc17bff47c33ade2ac28054e7/Smolknight.cs#L134
@@ -96,17 +95,9 @@ namespace ChristmasInDirtmouth
             //}
         }
 
-        public void OnSaveGame(int e)
-        {
-            // On save updated the saved inventory
-            GlobalData.HeroInventory.CopyTo(GlobalData.HeroInventorySaved, 0);
-        }
-
         void ILocalSettings<ModData>.OnLoadLocal(ModData s)
         {
             GlobalData = s;
-            // Overwrite current inventory with current saved one
-            GlobalData.HeroInventorySaved.CopyTo(GlobalData.HeroInventory, 0);
         }
 
         ModData ILocalSettings<ModData>.OnSaveLocal()
