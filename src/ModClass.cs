@@ -23,6 +23,7 @@ namespace ChristmasInDirtmouth
 
         private DirtmouthSceneHandler dirtmouthHandler;
         private ChristmasShopSceneHandler shopHandler;
+        private EasterEggHandler easterEggHandler;
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -50,6 +51,7 @@ namespace ChristmasInDirtmouth
                 preloadedObjects["Room_shop"]["Shop Menu"],
                 preloadedObjects["Cliffs_01"]["Cornifer Card"]
             );
+            easterEggHandler = new EasterEggHandler();
 
             Logger.Info("Initialized");
         }
@@ -76,22 +78,22 @@ namespace ChristmasInDirtmouth
                 HeroController.instance.AddGeo(1000);
             }
             // Debugging / Dev util for jumping to new scene
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                // Quick jump to casino for testing, remove
-                GameManager.instance.BeginSceneTransition(new GameManager.SceneLoadInfo
-                {
-                    SceneName = ChristmasShopSceneHandler.Name,
-                    EntryGateName = ChristmasShopSceneHandler.Gate,
-                    HeroLeaveDirection = GatePosition.right,
-                    EntryDelay = 0.2f,
-                    WaitForSceneTransitionCameraFade = true,
-                    PreventCameraFadeOut = false,
-                    Visualization = GameManager.SceneLoadVisualizations.Default,
-                    AlwaysUnloadUnusedAssets = false,
-                    forceWaitFetch = false
-                });
-            }
+            //if (Input.GetKeyDown(KeyCode.O))
+            //{
+            //    // Quick jump to casino for testing, remove
+            //    GameManager.instance.BeginSceneTransition(new GameManager.SceneLoadInfo
+            //    {
+            //        SceneName = ChristmasShopSceneHandler.Name,
+            //        EntryGateName = ChristmasShopSceneHandler.Gate,
+            //        HeroLeaveDirection = GatePosition.right,
+            //        EntryDelay = 0.2f,
+            //        WaitForSceneTransitionCameraFade = true,
+            //        PreventCameraFadeOut = false,
+            //        Visualization = GameManager.SceneLoadVisualizations.Default,
+            //        AlwaysUnloadUnusedAssets = false,
+            //        forceWaitFetch = false
+            //    });
+            //}
         }
 
         public void OnSaveGame(int e)
@@ -102,7 +104,7 @@ namespace ChristmasInDirtmouth
 
         void ILocalSettings<ModData>.OnLoadLocal(ModData s)
         {
-            //GlobalData = s;
+            GlobalData = s;
             // Overwrite current inventory with current saved one
             GlobalData.HeroInventorySaved.CopyTo(GlobalData.HeroInventory, 0);
         }

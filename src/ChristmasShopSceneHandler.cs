@@ -29,13 +29,13 @@ namespace ChristmasInDirtmouth
         public static string Name = "ChristmasShopScene";
         public static string Gate = "left_01";
         public static string Path;
+        public static bool SceneActive = false;
 
         private CustomScene sceneObj;
         private AssetBundle bundle;
         private const string RESOURCE_PATH = "ChristmasInDirtmouth.Resources.christmasshopscene";
         private static Satchel.Core satchelCore = new Satchel.Core();
         private static GameObject ShopPrefab, ShopMenu, SpritePrefab;
-        private static bool SceneActive = false;
 
         private bool boughtTest = false;
 
@@ -78,7 +78,6 @@ namespace ChristmasInDirtmouth
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnSceneChange;
 
             // Store preloaded fabs
-            Logger.Info(shopRegion.ToString());
             ShopPrefab = shopRegion;
             ShopMenu = shopMenu;
         }
@@ -93,8 +92,7 @@ namespace ChristmasInDirtmouth
                 AudioSource audio = GameObject.Find("root/audio").GetComponent<AudioSource>();
                 audio.Play();
 
-                //ChristmasInDirtmouth.ResetPrefabMaterials(GameObject.Find("root"));
-                Logger.Info("Christmas shop interior scene change");
+                Logger.Debug("Christmas shop interior scene change");
                 // Manually replicating because I already have game objects in the scene
                 // https://github.com/PrashantMohta/Satchel/blob/master/Utils/SceneUtils.cs#L144
                 GameObject gate = GameObject.Find(ChristmasShopSceneHandler.Gate).gameObject;
@@ -208,10 +206,7 @@ namespace ChristmasInDirtmouth
                 state = fsm.GetValidState("Sly 2");
                 Satchel.FsmUtil.RemoveAction(state, 5);
 
-                Logger.Info(fsm.FsmVariables.GetFsmString("No Stock Event").Value);
-                Logger.Info(fsm.FsmVariables.GetFsmBool("Stock Left").Value.ToString());
-
-                Logger.Warning("Gate Set up");
+                Logger.Success("Setup Christmas shop scene complete");
             }
         }
 
@@ -220,7 +215,6 @@ namespace ChristmasInDirtmouth
             Logger.Info("Christmas Shop Scene loading complete");
         }
 
-
         // Hook for replacing text in pop-up menus / title cards
         // Instead of creating new, we will intercept existing
         // https://github.com/ToboterXP/HollowKnight.TheGlimmeringRealm/blob/5183853ec31ece532549a6cf88d0b303a8d0fd7e/TextChanger.cs
@@ -228,11 +222,9 @@ namespace ChristmasInDirtmouth
         public string OnLanguageGet(string key, string sheetTitle, string orig)
         {
             if (!SceneActive) { return orig; }
-
-             //Logger.Info("==== " + key + "  " + sheetTitle + ": ");
-            Debug.Log("==== " + key + "  " + sheetTitle + ": ");
+            //Debug.Log("==== " + key + "  " + sheetTitle + ": ");
             // Replacing NPC title (pulled from the FSM of the sly shop)
-            if ((sheetTitle == "Sly" || sheetTitle == "Titles") && ModItems.NPCMap.ContainsKey(key))
+            if ((sheetTitle == "Sly" || sheetTitle == "Titles" || sheetTitle == "SatchelCustomDialogue") && ModItems.NPCMap.ContainsKey(key))
             {
                 return ModItems.NPCMap[key];
             }
@@ -255,12 +247,11 @@ namespace ChristmasInDirtmouth
             self.itemCount = -1;
             self.stockInv = new GameObject[self.stock.Length];
 
-            Logger.Error("rebuilding shop");
+            Logger.Debug("Rebuilding custom shop");
 
             GameObject prefab = self.stock[0];
             // Initialize shop items
             int itemCount = ChristmasInDirtmouth.GlobalData.HeroInventory.Where(c => !c).Count();
-            Logger.Warning(itemCount.ToString());
             self.stock = new GameObject[itemCount];
             int j = 0;
             for (int i = 0; i < ModItems.NUM_ITEMS; i++)

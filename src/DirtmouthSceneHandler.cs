@@ -22,16 +22,12 @@ namespace ChristmasInDirtmouth
         {
             // Hook onto unity scene change
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnSceneChange;
-            //On.AudioManager.BeginApplyMusicCue += OnAudioManagerBeginApplyMusicCue;
-            //On.AudioManager.BeginApplyAtmosCue += OnAudioManagerBeginApplyAtmosCue;
-            ModHooks.HeroUpdateHook += OnHeroUpdate;
         }
 
         public void OnSceneChange(Scene from, Scene to)
         {
             if (to.name == "Town")
             {
-
                 SceneManager sm = GameManager.instance.sm;
                 sm.isWindy = false;
 
@@ -104,50 +100,15 @@ namespace ChristmasInDirtmouth
 
                 // All
                 item = ChristmasInDirtmouth.GlobalData.HeroInventory.All(x => x == true);
-                Logger.Info(item.ToString());
                 listen.SetActive(item);
                 objab.transform.Find("_Decor/snow").gameObject.SetActive(item);
 
-                Logger.Info("Setup Christmas Dirtmouth complete");
+                Logger.Success("Setup Christmas Dirtmouth complete");
             }
             else if (bundle != null)
             {
                 bundle.Unload(true);
             }
-        }
-
-        public void OnHeroUpdate()
-        {
-            if (Input.GetKeyDown(KeyCode.K))
-            {
-                SceneManager sm = GameManager.instance.sm;
-                FieldInfo gmField = sm.GetType().GetField("gm", BindingFlags.NonPublic | BindingFlags.Instance);
-                GameManager gm = gmField.GetValue(sm) as GameManager;
-
-                AtmosCue atmosCue = ScriptableObject.CreateInstance<AtmosCue>();
-                gm.AudioManager.ApplyAtmosCue(atmosCue, 0.1f);
-
-                MusicCue musicCue = ScriptableObject.CreateInstance<MusicCue>();
-                gm.AudioManager.ApplyMusicCue(musicCue, 0f, 0.1f, false);
-            }
-        }
-        private IEnumerator OnAudioManagerBeginApplyMusicCue(On.AudioManager.orig_BeginApplyMusicCue orig, AudioManager self, MusicCue musicCue, float delayTime, float transitionTime, bool applySnapshot)
-        {
-            // Mute the background music in the scene to replace with our own
-            if (!ChristmasInDirtmouth.GlobalData.ShopIntro)
-            {
-                musicCue = ScriptableObject.CreateInstance<MusicCue>();
-            }
-            yield return orig(self, musicCue, delayTime, transitionTime, applySnapshot);
-        }
-
-        private IEnumerator OnAudioManagerBeginApplyAtmosCue(On.AudioManager.orig_BeginApplyAtmosCue orig, AudioManager self, AtmosCue musicCue, float transitionTime)
-        {
-            if (!ChristmasInDirtmouth.GlobalData.ShopIntro)
-            {
-                musicCue = ScriptableObject.CreateInstance<AtmosCue>();
-            }
-            yield return orig(self, musicCue, transitionTime);
         }
     }
 
