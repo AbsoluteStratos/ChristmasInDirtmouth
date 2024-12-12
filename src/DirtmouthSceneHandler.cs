@@ -33,7 +33,6 @@ namespace ChristmasInDirtmouth
             {
 
                 SceneManager sm = GameManager.instance.sm;
-                //sm.AmbientIntesityMix = 0.1f;
                 sm.isWindy = false;
 
                 if (bundle == null)
@@ -54,10 +53,9 @@ namespace ChristmasInDirtmouth
                 objab.SetActive(true);
                 ChristmasInDirtmouth.ResetPrefabMaterials(objab);
 
+                // ===== Shop ======
+
                 // Add a transition hook door collider
-                // Note that doors are a little more tricky than other gates, other gates will run the animation for you but not doors
-                // So instead what we will do is listen for the up / enter key press then trigger the transition and animation ourselves
-                // See CasinoTownDoorHandler
                 GameObject gate = objab.transform.Find("door_christmas_shop").gameObject;
                 gate.AddComponent<ChristmasShopDoorHandler>();
                 var tp = gate.AddComponent<TransitionPoint>();
@@ -70,16 +68,50 @@ namespace ChristmasInDirtmouth
                 tp.respawnMarker.respawnFacingRight = true;
                 tp.sceneLoadVisualization = GameManager.SceneLoadVisualizations.Default;
 
+                // ===== Decorations ======
+
+                // Garland
+                bool item = ChristmasInDirtmouth.GlobalData.HeroInventory[0];
+                objab.transform.Find("_Decor/sly/garland").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/stag/garland").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/mapper/garland").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/bretta/garland").gameObject.SetActive(item);
+
+                // Presents
+                item = ChristmasInDirtmouth.GlobalData.HeroInventory[1];
+                objab.transform.Find("_Decor/presents").gameObject.SetActive(item);
+
+                // Candles
+                item = ChristmasInDirtmouth.GlobalData.HeroInventory[2];
+                objab.transform.Find("_Decor/candles").gameObject.SetActive(item);
+
                 // Tree
-                GameObject tree = objab.transform.Find("_Decor/tree/listen").gameObject;
-                tree.AddComponent<TreeListenHandler>();
-                GameObject credits = tree.transform.Find("credits").gameObject;
+                item = ChristmasInDirtmouth.GlobalData.HeroInventory[3];
+                objab.transform.Find("_Decor/tree").gameObject.SetActive(item);
+
+                GameObject listen = objab.transform.Find("_Decor/tree/listen").gameObject;
+                listen.AddComponent<TreeListenHandler>();
+                GameObject credits = listen.transform.Find("credits").gameObject;
                 credits.SetActive(false);
+
+                // Lights
+                item = ChristmasInDirtmouth.GlobalData.HeroInventory[4];
+                objab.transform.Find("_Decor/sly/lights").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/stag/lights").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/mapper/lights").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/bretta/lights").gameObject.SetActive(item);
+                objab.transform.Find("_Decor/lights").gameObject.SetActive(item);
+
+                // All
+                item = ChristmasInDirtmouth.GlobalData.HeroInventory.All(x => x == true);
+                Logger.Info(item.ToString());
+                listen.SetActive(item);
+                objab.transform.Find("_Decor/snow").gameObject.SetActive(item);
+
                 Logger.Info("Setup Christmas Dirtmouth complete");
             }
             else if (bundle != null)
             {
-                //Log.Info("Unloading asset");
                 bundle.Unload(true);
             }
         }
@@ -217,12 +249,14 @@ namespace ChristmasInDirtmouth
     {
         private GameObject doorArrowPrompt;
         private bool door_active = false;
+        private IEnumerator co;
 
         private void Awake()
         {
             ModHooks.HeroUpdateHook += OnHeroUpdate;
             doorArrowPrompt = CreatePromptPrehab();
             doorArrowPrompt.SetActive(true);
+            co = PlayFireworksAnimation();
         }
         private GameObject CreatePromptPrehab(string text = "LISTEN")
         {
@@ -273,10 +307,10 @@ namespace ChristmasInDirtmouth
                 GameManager gm = gmField.GetValue(sm) as GameManager;
 
                 AtmosCue atmosCue = ScriptableObject.CreateInstance<AtmosCue>();
-                gm.AudioManager.ApplyAtmosCue(atmosCue, 0.1f);
+                gm.AudioManager.ApplyAtmosCue(atmosCue, 1.0f);
 
                 MusicCue musicCue = ScriptableObject.CreateInstance<MusicCue>();
-                gm.AudioManager.ApplyMusicCue(musicCue, 0f, 0.1f, false);
+                gm.AudioManager.ApplyMusicCue(musicCue, 0f, 1.0f, false);
 
                 // Back ground music
                 AudioSource audio = transform.Find("audio").GetComponent<AudioSource>();
@@ -287,9 +321,43 @@ namespace ChristmasInDirtmouth
                 Animator animator = credits.GetComponent<Animator>();
                 animator.Play("CreditsAnimation", -1, 0f);
                 credits.SetActive(true);
-                Logger.Info("here!");
 
+                // Stop any previous coroutine and restart
+                StopCoroutine(co);
+                co = PlayFireworksAnimation();
+                StartCoroutine(co);
             }
+        }
+
+        private IEnumerator PlayFireworksAnimation()
+        {
+            // Fireworks Animation
+            GameObject fireworks = transform.Find("fireworks").gameObject;
+            Animator anim = fireworks.GetComponent<Animator>();
+            fireworks.SetActive(false);
+            anim.Play("fireworks off", -1, 0f);
+
+            yield return new WaitForSeconds(40);
+            // Chorus 1
+            fireworks.SetActive(true);
+            anim.Play("fireworks on", -1, 0f);
+            yield return new WaitForSeconds(52);
+
+            anim.Play("fireworks off", -1, 0f);
+
+            yield return new WaitForSeconds(5);
+            fireworks.SetActive(false);
+
+            yield return new WaitForSeconds(55);
+            // Chorus 2
+            fireworks.SetActive(true);
+            anim.Play("fireworks on", -1, 0f);
+            yield return new WaitForSeconds(55);
+
+            anim.Play("fireworks off", -1, 0f);
+            yield return new WaitForSeconds(5);
+            fireworks.SetActive(false);
+            yield break;
         }
     }
 }

@@ -17,7 +17,6 @@ using HutongGames.PlayMaker.Actions;
 using System.Security.AccessControl;
 using System.ComponentModel;
 using System.Collections;
-using FrogCore;
 using HutongGames.PlayMaker;
 using GlobalEnums;
 using static System.TimeZoneInfo;
@@ -205,6 +204,10 @@ namespace ChristmasInDirtmouth
                 fsm = menu.LocateMyFSM("shop_control");
                 state = fsm.GetValidState("Sly");
                 Satchel.FsmUtil.RemoveAction(state, 6);
+
+                state = fsm.GetValidState("Sly 2");
+                Satchel.FsmUtil.RemoveAction(state, 5);
+
                 Logger.Info(fsm.FsmVariables.GetFsmString("No Stock Event").Value);
                 Logger.Info(fsm.FsmVariables.GetFsmBool("Stock Left").Value.ToString());
 

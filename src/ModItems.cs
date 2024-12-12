@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FrogCore;
 using Satchel;
 using UnityEngine;
 
@@ -56,12 +55,13 @@ namespace ChristmasInDirtmouth
             { "CHRISTMAS_ITEM_1", "200" },
             { "CHRISTMAS_ITEM_2", "250" },
             { "CHRISTMAS_ITEM_3", "500" },
-            { "CHRISTMAS_ITEM_4", "1000" },
+            { "CHRISTMAS_ITEM_4", "750" },
         };
 
         public static Dictionary<string, string> NPCMap = new Dictionary<string, string> {
             { "SLY_SHOP_INTRO", "Ahhh, little wanderer! It is you! The tiny hero I've heard so much about, skipping from shadow to light. What a treat!<page>Heehee... I’ve been decking my wares for a season of joy! You’ve braved many a deep and dreary place, haven’t you? Perhaps a little sparkle and cheer would warm that quiet shell of yours, hmm?" },
             { "SLY_NOSTOCK_1", "Oh my, you've cleared me out! Not a single bauble or bell left to spare. Such enthusiasm warms my little heart, dear wanderer.<page>For now, take your treasures and spread some cheer, won’t you? The world could always use a touch of light. Farewell, my festive friend!"},
+            { "SLY_NOSTOCK_2", "Oh my, you've cleared me out! Not a single bauble or bell left to spare. Such enthusiasm warms my little heart, dear wanderer.<page>For now, take your treasures and spread some cheer, won’t you? The world could always use a touch of light. Farewell, my festive friend!"},
             { "SLY_MAIN", "Merrywisp" },
             { "SLY_SUB", "" },
             { "SLY_SUPER", "Festive Knight" },
