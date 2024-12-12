@@ -68,9 +68,9 @@ namespace ChristmasInDirtmouth
             // Changed NPC lines for easter egg
             if (CuteMas)
             {
-                ModItems.NPCMap["MERRY_DIALOG_1"] = "nossSus";
-                ModItems.NPCMap["MERRY_DIALOG_2"] = "Ohhhhhhhh myyyy Nob!";
-                ModItems.NPCMap["MERRY_DIALOG_3"] = "What the nob?";
+                ModItems.NPCMap["MERRY_DIALOG_1"] = "Its nobberin time!";
+                ModItems.NPCMap["MERRY_DIALOG_2"] = "Nobo nobonobu";
+                ModItems.NPCMap["MERRY_DIALOG_3"] = "Erm, What the nob?";
             }
             else
             {
