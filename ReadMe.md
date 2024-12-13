@@ -7,23 +7,24 @@
   <img src="https://github.com/AbsoluteStratos/ChristmasInDirtmouth/blob/main/docs/demo_small.gif" alt="Demo gif"/>
 </p>
 
-Things are getting festive in Dirtmouth.
-A mod that adds a new christmas shop own by a new NPC, Merrywisp, in Dirthmouth you can by decorations from to bring some holiday chear to this gloomy kingdom.
-Once fully decorated, have a listen and relax under the glow of the tree.
+Things are getting festive in Dirtmouth!
+This mod adds a new Christmas shop owned by a new NPC, Merrywisp.
+In Dirtmouth, you can buy decorations from Merrywisp to bring some holiday cheer to this gloomy kingdom.
+Once fully decorated, take a moment to listen and relax under the glow of the tree.
 Happy holidays!
 
-This is a intermediate / advanced mod that builds upon learnings from my previous [intermediate](https://github.com/AbsoluteStratos/CasinoKnight) and [beginner](https://github.com/AbsoluteStratos/FartKnight) mods which I recommend checking out if you are a new modder.
-Develop of this mod occured over the course of two weeks, most of the time working on the item / shop logic.
-This mod leans more heavily on Unity development than my previous with custom assets, scene, particle systems, animations, etc.
-You can checkout out the unity project in my [HKWorldEdit2 Fork](https://github.com/AbsoluteStratos/HKWorldEdit2/tree/stratos/ChristmasInDirtmouth/Assets/ChristmasInDirtmouth).
+This is an intermediate/advanced mod that builds upon lessons from my previous [intermediate](https://github.com/AbsoluteStratos/CasinoKnight) and [beginner](https://github.com/AbsoluteStratos/FartKnight) mods, which I recommend checking out if you are new to modding.
+Development of this mod occurred over the course of two weeks, with most of the time spent working on the item/shop logic.
+This mod leans more heavily on Unity development than my previous projects, featuring custom assets, scenes, particle systems, animations, and more.
+You can check out the Unity project in my [HKWorldEdit2 Fork](https://github.com/AbsoluteStratos/HKWorldEdit2/tree/stratos/ChristmasInDirtmouth/Assets/ChristmasInDirtmouth).
 
 This mod has the following features:
 
 - A simple mod menu created using [Satchel BetterMenus](https://prashantmohta.github.io/ModdingDocs/Satchel/BetterMenus/better-menus.html)
-- Modification of an existing scene with many new assets developed in unity and loaded via asset bundle
-- Adding a new scene (shop) with transition in an existing scene
-- Adding a custom shop with new items that are tracked externally from the vanilla player data
-- A new interactive NPC with custom dialog
+- Modification of an existing scene with many new assets developed in Unity and loaded via an asset bundle
+- Addition of a new scene (shop) with a transition from an existing scene
+- A custom shop menu UI with new items tracked externally from the vanilla player data
+- A new interactive NPC with custom dialogue
 
 To show logs:
 https://hk-modding.github.io/api/articles/logs.html#in-game-console
