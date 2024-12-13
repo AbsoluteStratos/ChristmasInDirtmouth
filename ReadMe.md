@@ -8,8 +8,8 @@
 </p>
 
 Things are getting festive in Dirtmouth!
-This mod adds a new Christmas shop owned by a new NPC, Merrywisp.
-In Dirtmouth, you can buy decorations from Merrywisp to bring some holiday cheer to this gloomy kingdom.
+This mod adds a new Christmas shop in Dirtmouth owned by a new NPC, Merrywisp.
+Our hero can buy various decorations for geo to bring some holiday cheer to this gloomy kingdom.
 Once fully decorated, take a moment to listen and relax under the glow of the tree.
 Happy holidays!
 
