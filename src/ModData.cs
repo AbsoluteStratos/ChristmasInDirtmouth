@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChristmasInDirtmouth
+﻿namespace ChristmasInDirtmouth
 {
     // https://prashantmohta.github.io/ModdingDocs/saving-mod-data.html
     public class ModData

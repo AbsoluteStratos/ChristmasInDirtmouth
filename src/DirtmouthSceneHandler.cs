@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using GlobalEnums;
 using Modding;
 using Satchel;
@@ -208,15 +204,15 @@ namespace ChristmasInDirtmouth
 
     public class TreeListenHandler : MonoBehaviour
     {
-        private GameObject doorArrowPrompt;
-        private bool door_active = false;
+        private GameObject treeArrowPrompt;
+        private bool tree_active = false;
         private IEnumerator co;
 
         private void Awake()
         {
             ModHooks.HeroUpdateHook += OnHeroUpdate;
-            doorArrowPrompt = CreatePromptPrehab();
-            doorArrowPrompt.SetActive(true);
+            treeArrowPrompt = CreatePromptPrehab();
+            treeArrowPrompt.SetActive(true);
             co = PlayFireworksAnimation();
         }
         private GameObject CreatePromptPrehab(string text = "LISTEN")
@@ -233,7 +229,7 @@ namespace ChristmasInDirtmouth
         {
             if (other.name == "Knight")
             {
-                door_active = true;
+                tree_active = true;
             }
         }
 
@@ -241,7 +237,7 @@ namespace ChristmasInDirtmouth
         {
             if (other.name == "Knight" && Mathf.Abs(other.attachedRigidbody.velocity.x) < 0.1)
             {
-                doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Show();
+                treeArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Show();
             }
         }
 
@@ -249,8 +245,8 @@ namespace ChristmasInDirtmouth
         {
             if (other.name == "Knight")
             {
-                door_active = false;
-                doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Hide();
+                tree_active = false;
+                treeArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Hide();
             }
         }
 
@@ -259,9 +255,9 @@ namespace ChristmasInDirtmouth
             // In the modding tutorial you will see the use of Input.GetKeyDown
             // We dont use that here because we want to be agnostic to the key bind for up and also support controllers
             // User the inputHanlder instead
-            if (GameManager.instance.inputHandler.inputActions.up.IsPressed && door_active)
+            if (GameManager.instance.inputHandler.inputActions.up.IsPressed && tree_active)
             {
-                door_active = false;
+                tree_active = false;
                 // Trigger a scene transition
                 SceneManager sm = GameManager.instance.sm;
                 FieldInfo gmField = sm.GetType().GetField("gm", BindingFlags.NonPublic | BindingFlags.Instance);

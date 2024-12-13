@@ -3,24 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Satchel;
 using static Satchel.SceneUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Modding;
-using static Mono.Security.X509.X520;
-using InControl;
-using static CinematicSkipPopup;
 using HutongGames.PlayMaker.Actions;
-using System.Security.AccessControl;
-using System.ComponentModel;
 using System.Collections;
 using HutongGames.PlayMaker;
-using GlobalEnums;
-using static System.TimeZoneInfo;
-
 
 namespace ChristmasInDirtmouth
 {
@@ -148,7 +138,7 @@ namespace ChristmasInDirtmouth
                             // Item ID in the "Confirm Control" FSM is always 0 for some reason
                             int itemMenuId = fsmItemControl.FsmVariables.IntVariables[3].Value;
 
-                            Logger.Info(String.Format("Christmas Item Bought: {0:D} for {0:D} geo", itemMenuId, cost));
+                            Logger.Info(String.Format("Christmas Item Bought: {0:D}", itemMenuId));
                             // Reuse, normal event in switch action to trigger a complete
                             switchaction.Event(sendEvent[0]);
                             // Set item in our inventory to true that we just bought. Index is based on position in shop
@@ -222,7 +212,6 @@ namespace ChristmasInDirtmouth
         public string OnLanguageGet(string key, string sheetTitle, string orig)
         {
             if (!SceneActive) { return orig; }
-            //Debug.Log("==== " + key + "  " + sheetTitle + ": ");
             // Replacing NPC title (pulled from the FSM of the sly shop)
             if ((sheetTitle == "Sly" || sheetTitle == "Titles" || sheetTitle == "SatchelCustomDialogue") && ModItems.NPCMap.ContainsKey(key))
             {

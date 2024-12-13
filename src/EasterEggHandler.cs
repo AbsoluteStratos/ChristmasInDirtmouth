@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using HutongGames.PlayMaker.Actions;
-using InControl;
-using Modding;
+﻿using Modding;
 using Satchel;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -69,7 +60,7 @@ namespace ChristmasInDirtmouth
             if (CuteMas)
             {
                 ModItems.NPCMap["MERRY_DIALOG_1"] = "Its nobberin time!";
-                ModItems.NPCMap["MERRY_DIALOG_2"] = "Nobo nobonobu";
+                ModItems.NPCMap["MERRY_DIALOG_2"] = "Noboh, noboh nobu";
                 ModItems.NPCMap["MERRY_DIALOG_3"] = "Erm, What the nob?";
             }
             else
