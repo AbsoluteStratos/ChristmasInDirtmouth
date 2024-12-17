@@ -66,7 +66,7 @@ CasinoKnight
 
 > [!WARNING]  
 > This mod is presently not fully compatable with the following known mods:
->  - `HKVocalize` due to how this mod handles NPC dialog, core functions still work however
+>  - `HKVocalize` [[Issue](https://github.com/AbsoluteStratos/ChristmasInDirtmouth/issues/2)]
 
 ## Support
 
