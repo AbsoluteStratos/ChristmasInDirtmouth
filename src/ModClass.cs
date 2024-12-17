@@ -132,6 +132,14 @@ namespace ChristmasInDirtmouth
                 {
                     child.GetComponent<SpriteRenderer>().material = new Material(Shader.Find("Sprites/Default"));
                 }
+
+                if (child.GetComponent<ParticleSystem>() != null)
+                {
+                    Material current = child.GetComponent<ParticleSystem>().GetComponent<Renderer>().material;
+                    Material particle = new Material(Shader.Find("Legacy Shaders/Particles/Additive (Soft)"));
+                    particle.mainTexture = current.mainTexture;
+                    child.GetComponent<ParticleSystem>().GetComponent<Renderer>().material = particle;
+                }
                 ResetPrefabMaterials(child);
             }
         }
