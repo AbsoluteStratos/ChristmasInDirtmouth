@@ -65,9 +65,8 @@ CasinoKnight
 - [Satchel](https://github.com/PrashantMohta/Satchel/)
 
 > [!WARNING]  
-> This mod is presently not compatable with the following known mods:
->  - HKVolcalize due to how this mod handles NPC dialog
->  - HKMirror (and all mods that depend on it) due to Satchel custom Diaglog use
+> This mod is presently not fully compatable with the following known mods:
+>  - `HKVocalize` due to how this mod handles NPC dialog, core functions still work however
 
 ## Support
 
