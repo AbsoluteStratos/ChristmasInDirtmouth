@@ -9,7 +9,7 @@ namespace ChristmasInDirtmouth
     public class ChristmasInDirtmouth : Mod, ILocalSettings<ModData>, ICustomMenuMod, ITogglableMod
     {
         new public static string GetName() => "Christmas In Dirtmouth";
-        public override string GetVersion() => "1.0.1";
+        public override string GetVersion() => "1.0.2";
 
         public static CustomDialogueManager MerryDialogueManager;
         internal static ModData GlobalData = new ModData();

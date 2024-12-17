@@ -169,25 +169,32 @@ namespace ChristmasInDirtmouth
             // In the modding tutorial you will see the use of Input.GetKeyDown
             // We dont use that here because we want to be agnostic to the key bind for up and also support controllers
             // User the inputHanlder instead
-            if (GameManager.instance.inputHandler.inputActions.up.IsPressed && door_active)
+            if (door_active)
             {
-                door_active = false;
-                // Trigger a scene transition
-                gm.BeginSceneTransition(new GameManager.SceneLoadInfo
+                Logger.Debug("Christmas shop door active");
+                // TODO Remove key down O, presently added due to issues
+                if (GameManager.instance.inputHandler.inputActions.up.WasPressed || GameManager.instance.inputHandler.inputActions.up.IsPressed || Input.GetKeyDown(KeyCode.O))
                 {
-                    SceneName = ChristmasShopSceneHandler.Name,
-                    EntryGateName = ChristmasShopSceneHandler.Gate,
-                    HeroLeaveDirection = GatePosition.bottom,
-                    EntryDelay = 0.2f,
-                    WaitForSceneTransitionCameraFade = true,
-                    PreventCameraFadeOut = false,
-                    Visualization = GameManager.SceneLoadVisualizations.Default,
-                    AlwaysUnloadUnusedAssets = false,
-                    forceWaitFetch = false
-                });
-                // Must be after, the Begin transition will cancel animation if before
-                HeroController.instance.StartCoroutine(PlayExitAnimation());
+                    Logger.Debug("Christmas shop door triggered");
+                    door_active = false;
+                    // Trigger a scene transition
+                    gm.BeginSceneTransition(new GameManager.SceneLoadInfo
+                    {
+                        SceneName = ChristmasShopSceneHandler.Name,
+                        EntryGateName = ChristmasShopSceneHandler.Gate,
+                        HeroLeaveDirection = GatePosition.bottom,
+                        EntryDelay = 0.2f,
+                        WaitForSceneTransitionCameraFade = true,
+                        PreventCameraFadeOut = false,
+                        Visualization = GameManager.SceneLoadVisualizations.Default,
+                        AlwaysUnloadUnusedAssets = false,
+                        forceWaitFetch = false
+                    });
+                    // Must be after, the Begin transition will cancel animation if before
+                    HeroController.instance.StartCoroutine(PlayExitAnimation());
+                }
             }
+            
         }
 
         private IEnumerator PlayExitAnimation()
@@ -255,35 +262,39 @@ namespace ChristmasInDirtmouth
             // In the modding tutorial you will see the use of Input.GetKeyDown
             // We dont use that here because we want to be agnostic to the key bind for up and also support controllers
             // User the inputHanlder instead
-            if (GameManager.instance.inputHandler.inputActions.up.IsPressed && tree_active)
-            {
-                tree_active = false;
-                // Trigger a scene transition
-                SceneManager sm = GameManager.instance.sm;
-                FieldInfo gmField = sm.GetType().GetField("gm", BindingFlags.NonPublic | BindingFlags.Instance);
-                GameManager gm = gmField.GetValue(sm) as GameManager;
+            if (tree_active){
+                // TODO Remove key down O, presently added due to issues
+                if (GameManager.instance.inputHandler.inputActions.up.WasPressed || GameManager.instance.inputHandler.inputActions.up.IsPressed || Input.GetKeyDown(KeyCode.O))
+                {
+                    tree_active = false;
+                    // Trigger a scene transition
+                    SceneManager sm = GameManager.instance.sm;
+                    FieldInfo gmField = sm.GetType().GetField("gm", BindingFlags.NonPublic | BindingFlags.Instance);
+                    GameManager gm = gmField.GetValue(sm) as GameManager;
 
-                AtmosCue atmosCue = ScriptableObject.CreateInstance<AtmosCue>();
-                gm.AudioManager.ApplyAtmosCue(atmosCue, 1.0f);
+                    AtmosCue atmosCue = ScriptableObject.CreateInstance<AtmosCue>();
+                    gm.AudioManager.ApplyAtmosCue(atmosCue, 1.0f);
 
-                MusicCue musicCue = ScriptableObject.CreateInstance<MusicCue>();
-                gm.AudioManager.ApplyMusicCue(musicCue, 0f, 1.0f, false);
+                    MusicCue musicCue = ScriptableObject.CreateInstance<MusicCue>();
+                    gm.AudioManager.ApplyMusicCue(musicCue, 0f, 1.0f, false);
 
-                // Back ground music
-                AudioSource audio = transform.Find("audio").GetComponent<AudioSource>();
-                audio.Play();
+                    // Back ground music
+                    AudioSource audio = transform.Find("audio").GetComponent<AudioSource>();
+                    audio.Play();
 
-                // Enable Credits
-                GameObject credits = transform.Find("credits").gameObject;
-                Animator animator = credits.GetComponent<Animator>();
-                animator.Play("CreditsAnimation", -1, 0f);
-                credits.SetActive(true);
+                    // Enable Credits
+                    GameObject credits = transform.Find("credits").gameObject;
+                    Animator animator = credits.GetComponent<Animator>();
+                    animator.Play("CreditsAnimation", -1, 0f);
+                    credits.SetActive(true);
 
-                // Stop any previous coroutine and restart
-                StopCoroutine(co);
-                co = PlayFireworksAnimation();
-                StartCoroutine(co);
+                    // Stop any previous coroutine and restart
+                    StopCoroutine(co);
+                    co = PlayFireworksAnimation();
+                    StartCoroutine(co);
+                }
             }
+            
         }
 
         private IEnumerator PlayFireworksAnimation()

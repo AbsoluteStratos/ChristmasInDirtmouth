@@ -370,30 +370,34 @@ namespace ChristmasInDirtmouth
             // In the modding tutorial you will see the use of Input.GetKeyDown
             // We dont use that here because we want to be agnostic to the key bind for up and also support controllers
             // User the inputHanlder instead
-            if (GameManager.instance.inputHandler.inputActions.up.IsPressed && active)
-            {
-                active = false;
-                doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Hide();
-                if (ChristmasInDirtmouth.GlobalData.ShopIntro)
+            if (active) {
+                Logger.Debug("NPC diaglog active");
+                if (GameManager.instance.inputHandler.inputActions.up.WasPressed || GameManager.instance.inputHandler.inputActions.up.IsPressed)
                 {
-                    ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue("SLY_SHOP_INTRO");
-                    //ChristmasInDirtmouth.GlobalData.ShopIntro = false;
-                }
-                else
-                {
-                    // Random dialog
-                    System.Random rnd = new System.Random();
-                    int index = rnd.Next(1, 4);
-                    // Ensure we dont get the same message twice in a row
-                    if (prev_convo == index)
+                    Logger.Debug("NPC diaglog triggered");
+                    active = false;
+                    doorArrowPrompt.GetComponent<CustomArrowPromptBehaviour>().Hide();
+                    if (ChristmasInDirtmouth.GlobalData.ShopIntro)
                     {
-                        index += 1;
-                        if (index == 4) { index = 1; }
+                        ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue("SLY_SHOP_INTRO");
+                        //ChristmasInDirtmouth.GlobalData.ShopIntro = false;
                     }
-                    ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue(String.Format("MERRY_DIALOG_{0:d}", index));
-                    prev_convo = index;
+                    else
+                    {
+                        // Random dialog
+                        System.Random rnd = new System.Random();
+                        int index = rnd.Next(1, 4);
+                        // Ensure we dont get the same message twice in a row
+                        if (prev_convo == index)
+                        {
+                            index += 1;
+                            if (index == 4) { index = 1; }
+                        }
+                        ChristmasInDirtmouth.MerryDialogueManager.ShowDialogue(String.Format("MERRY_DIALOG_{0:d}", index));
+                        prev_convo = index;
+                    }
+
                 }
-                
             }
         }
     }
