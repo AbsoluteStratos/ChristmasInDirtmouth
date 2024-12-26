@@ -1,6 +1,6 @@
 # Christmas In Dirtmouth
 
-[![Discord](https://img.shields.io/discord/879125729936298015.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/F6Y5TeFQ8j) ![OS](https://img.shields.io/badge/os-windows-blue) [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![Downloads](https://img.shields.io/github/downloads/AbsoluteStratos/ChristmasInDirtmouth/total
+[![Discord](https://img.shields.io/discord/879125729936298015.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/F6Y5TeFQ8j) ![OS](https://img.shields.io/badge/os-windows%20%7C%20mac-blue?label=os) [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![Downloads](https://img.shields.io/github/downloads/AbsoluteStratos/ChristmasInDirtmouth/total
 )](https://github.com/AbsoluteStratos/ChristmasInDirtmouth/releases)
 
 <p align="center">
